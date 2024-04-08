@@ -1,0 +1,99 @@
+Changes: 
+
+TAXBEN_Calc: 
+
+- Moved the income tax scale and the JSP scale to their respective functions (calc_income_tax and calc_main_benefit). 
+
+- Added variables related to HECS debt 
+
+HECSDebt -> The amount of HECS that an individual has in total 
+HECS_on -> A dummy variable for whether the user wants to turn on the HECS functionality in the calculator. 
+
+- Moved the creating of charts to a seperate function folder, calc_hours_charts. 
+- Begun creating a series of functions which potential private income on the x axis, against total income on the y axis (in progress), from line 119 down. 
+
+
+Calc_hours_charts: 
+
+ A function that produces a 4 panel chart, with basic income versus hours, disaggregated income versus hours, basic EMTR versus hours, and dissagregeted EMTR versus hours. 
+
+These four charts are plot_income_hourly, EMTR, plot_income_highly_detailed, and plot_EMTR_Highly_Detailed respectively. 
+
+The highly_detailed charts consider a breakdown from where marginal income comes from. 
+
+
+Calc_net_income: 
+
+- Added an additional variable to the call, HECSon. Set to 1 if you wish to include HECS, and set to 0 if you do not wish to include HECS. 
+- Added a HECS_payment variable creation (see calc_HECS). HECS value is reduced to 0 if turned off by HECSon.
+- Added a supp_benefit variable from calc_benefit_abated 
+- Added a "Rent Assistance to 0 Flag" 
+	- Prior to this change, Rent Assistance and the Energy Supplement were remaining perpetually for the 		  person. Even if they were no longer recieving a benefit or FTB A, they were still recieving RA. This 	flag helps correct for this. 
+	- The flag assesses whether the person is recieving a taxable benefit. Or above the base level or FTB A. 	 If neither of these are true, then the flag is set to 1, and the person's RA and ES (supp_benefit) will 	 be set to 0. 
+- Changed the calculation for net_income to simply add supp_benefit, rather than indirectly adding it via abated_benefit - taxable benefit. 
+- Increased the number of variables the function returns. 
+
+
+Calc_net_income_detailed: 
+
+- Created a function that is a more granular version of Calc_net_income. Allows the function to return a breakdown of the components of their income. 
+
+- Returns family tax benefit A and family tax benefit B respectively, instead of the combined value of both of them. 
+- Returns all current components of included benefits - PP_Pay, JSP, RA, ES. 
+- RA_to_Flag as above, and sets RA and ES to 0 if the person is not on the benefit or recieving at least hre base value of FTA A. 
+- Returns all of these relevant variables. 
+
+
+
+Calc_benefit_abated 
+
+- Fixed the error where young children were crashing the calculator. This was because PP_S_athresh was not defined. 
+- Edited the function to  calculate the PPS_S_athresh based upon the number of children that someone has: https://www.servicesaustralia.gov.au/income-and-assets-tests-for-parenting-payment?context=22196
+
+- Edited the function to then use this calculated threshold to estimate the abatemenet. 
+- Edited the function to calculate not just the abatement in total, but the abatement of individual benefits. 
+- Edited the partner abatement component for JSP and Parenting Payment to take into account the more sophisticated thresholds and combinations of payments based upon https://www.servicesaustralia.gov.au/income-and-assets-tests-for-parenting-payment?context=22196
+- Edited the function to pick up the individual components of RA and ES from the calc_beneift_gross function. 
+- Edited the function to return all of the individual benefit components. 
+
+
+Calc_benefit_gross 
+
+- Edited the function to return all of the individual benefit components from their respective functions. 
+- Edited the function to return all of the individual benefit components. 
+
+
+Calc_main_benefit 
+
+- Moved in the component of creating the jobseeker schedule. 
+- Fixed the PPS_athresh threshold. 
+
+Calc rent_asssitance 
+
+- No changes 
+
+Calc_energy_supp
+
+- No changes 
+
+Calc_HECS 
+
+- New Function. Estimates the point in the HECS Schedule the individual falls on. Then, applies the HECS Repayment rate based upon this. 
+- NOTE: HECS is NOT a marginal tax. Hence, moving up to a higher HECS bracket results in a large EMTR. 
+- The Fucnction checks the individual's total HECS balance (HECSDebt). If their estimated repayments are greater than their total debt balance, then their amount repaid is set to the total debt balance. 
+- Hence, if the HECS debt balance is 0, then their amount repaid is 0. 
+
+Calc_family_benefit 
+- Edited the function to return the individual components of family tax benefit, A and B. 
+
+
+
+
+
+
+
+
+
+
+
+
