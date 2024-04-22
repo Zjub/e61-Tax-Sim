@@ -1,0 +1,915 @@
+---
+title: "Plots from e61's Tax and Transfer Calculator v.011"
+author: "Matt Maltman and Matt Nolan"
+date: "2024-04-08"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+
+## Example 1
+
+- Partnered Renter - Partner earning $45,000 per year. Rent is $900 a fortnight. 
+- 2 Children aged 1 and 9. 
+- Earns $35 an hour, considering working up to 60 hours a week. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#TAXBEN_calc <- function(){ # Needs to be a function of all the options we have in the shiny
+remotes::install_github("e61-institute/theme61", dependencies = TRUE, upgrade = "always")
+
+if(!require("pacman")) install.packages("pacman")
+
+pacman::p_load(
+  tidyverse,
+  data.table,
+  plotly,
+  theme61)
+
+
+library(theme61)
+
+# Include functions ----
+scripts <- list.files(pattern = "calc_")
+for (script in scripts){
+  source(script)
+}
+
+
+# Import parameters for the given quarter ----
+
+policy_date1 <- "Q1_2023" # XXXX Replace this with a function call.
+
+policy_parameters_1 <- policy_parameters(policy_date1)
+
+# Assign policy parameters from the policy file.
+for (i in 1:nrow(policy_parameters_1)){
+  assign(policy_parameters_1$Parameter[i],policy_parameters_1$Value[i])
+}
+
+
+#Add defaults for initial testing [this is written as calls below] ----
+  partnered <- 1
+  partner_earnings <- 45000
+  over_60 <- 0
+  living_alone <- 0
+  Have_dep <- 1
+  Main_carer_dep <- 1
+  child_ages <- c(1,9)
+
+  Numb_dep <- 0
+  young_child <- 0
+
+  # Individual characteristics
+  Carer <- 0
+  Disability <- 0
+
+  # Housing status
+  Home_owner <- 0
+  Rent <- 900 # Fortnightly rent amount
+
+  # Labour market conditions
+  wage <- 35
+  max_hours <- 60
+
+  # Meets conditions to access benefit on a personal level
+  ben_eligibility <- 1
+
+  # Citation
+  cite <- "The world"
+
+
+## Setup the individuals characteristics based on user inputs ----
+# Define family characteristics
+  partnered <- as.numeric(partnered)
+  partner_earnings <- partner_earnings
+  over_60 <- as.numeric(over_60)
+  living_alone <- as.numeric(living_alone)
+  Have_dep <- as.numeric(Have_dep)
+  child_age <- child_ages
+  if (Main_carer_dep == 0){
+    child_age <- 99
+  }
+
+  Numb_dep <- length(child_age[child_age < 20])
+  young_child <- min(child_age)
+
+  PPeligible <- ifelse((young_child <= 6 | (young_child <= 8 & partnered == 0)) & Main_carer_dep == 1,1,0)
+
+  # Individual characteristics
+  Carer <- 0
+  Disability <- 0
+
+  # Housing status
+  Home_owner <- 0
+  Rent <- Rent # Fortnightly rent amount
+
+  # Labour market conditions
+  wage <- wage
+  max_hours <- max_hours
+
+  # Meets conditions to access benefit on a personal level
+  ben_eligibility <- 1
+  
+  #### HECS Debt (Set to 0 if no HECS Debt)
+
+  HECSDebt <- 50000
+  
+  #### Set to 0 to turn HECS repayments off 
+  
+  HECS_on <- 0
+  
+  ## Set up hourly income plots ----
+
+ #### Fully Detailed Calculation/breakdown
+
+highly_detailed_variable_calculator <- function(wage_rate) {
+  # Initialize an empty data frame to store results for each hour
+  results_df <- data.frame(hours = integer(0), net_income = numeric(0), income_tax = numeric(0),
+                           work_income = numeric(0), JSP = numeric(0), PP_Pay = numeric(0), 
+                           RA = numeric(0), ES = numeric(0),
+                           taxable_benefit = numeric(0), gross_income = numeric(0),
+                           gross_fam_income = numeric(0), net_fam_a_income = numeric(0), 
+                           net_fam_b_income = numeric(0), HECS_payment <- numeric(0))
+  
+  for (hours in seq(0, max_hours, by = 0.1)) {
+    # Calculate net income and other variables for the given number of hours
+    calc_results <- calc_net_income_detailed(wage_rate, hours, HECS_on)
+    
+    # Append the results to the data frame
+    results_df <- rbind(results_df, cbind(hours, as.data.frame(t(unlist(calc_results)))))
+  }
+  results_df$income_tax <- results_df$income_tax * -1 
+  results_df$HECS_payment <- results_df$HECS_payment * -1 
+  results_df$taxable_benefit <- results_df$taxable_benefit * 26
+  return(results_df)
+}
+
+incomes_data_hourly_highly_detailed <- highly_detailed_variable_calculator(wage)
+
+all_incomes_long <- pivot_longer(incomes_data_hourly_highly_detailed, 
+                                 cols = c(income_tax, work_income, RA, JSP, ES, PP_Pay,  net_fam_a_income, net_fam_b_income, HECS_payment),
+                                 names_to = "income_type", 
+                                 values_to = "Amount")
+
+#all_incomes_long <- all_incomes_long %>%
+#  group_by(income_type) %>%
+#  filter(!(all(amount == 0))) %>%
+#  ungroup()
+
+all_incomes_long$income_type <- as.factor(all_incomes_long$income_type)
+levels(all_incomes_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                          "Job Seeker Payment", "Family Tax Benefit A", 
+                                          "Family Tax Benefit B", "Parenting Payment", 
+                                          "Commonwealth Rent Assistance", "Work Income")
+
+all_incomes_long$'Income Type' <- all_incomes_long$income_type
+
+all_incomes_long <- all_incomes_long %>%
+  mutate(Amount = round(Amount, 2))
+
+incomes_data_hourly_highly_detailed$'Net Income' <-  incomes_data_hourly_highly_detailed$net_income 
+
+# Creating the text string
+text_string <- paste("Taxes and transfers for the", 
+                     ifelse(partnered == 1, "partnered", "unpartnered"), 
+                     ifelse(Home_owner == 1, "home owner", "renter")) 
+
+# Append Parenting Payment Benefit eligibility
+if (PPeligible == 1 & Numb_dep > 0) {
+  text_string <- paste(text_string, ",eligible for the Parenting Payment")
+} else if (PPeligible == 0 & Numb_dep > 0) {
+  text_string <- paste(text_string, ", not eligible for the Parenting Payment")
+}
+
+
+
+max_net_income <- max(incomes_data_hourly_highly_detailed$`Net Income`, na.rm = TRUE) * 1.4
+  min_amount <- min(all_incomes_long$Amount, na.rm = TRUE) * 1.4
+
+
+
+# Plotting
+plot_income_highly_detailed <- ggplot() +
+  geom_col(data = all_incomes_long, aes(x = hours, y = Amount  , fill = `Income Type`), width = 0.5 ) +
+  geom_line(data = incomes_data_hourly_highly_detailed, aes(x = hours, y = `Net Income` ), size = 2, col = "black") +
+  labs_e61(title = text_string,
+           x = "Hours worked",
+           y = "$",
+           fill = "Income Type",
+           colour = "") + add_baseline()  + scale_fill_e61() +
+  scale_x_continuous(expand = c(0, Inf)) + # Remove default expansion for x-axis
+  scale_y_continuous(expand = c(0, 0), limits =c(min_amount, max_net_income)) 
+
+#plot_income_highly_detailed
+
+int_plot_income_highly_detailed <- ggplotly(plot_income_highly_detailed)
+#int_plot_income_highly_detailed 
+
+
+highly_detailed_variable_calculator <- function(wage_rate) {
+  # Initialize an empty data frame to store results for each hour
+  results_df <- data.frame(hours = integer(0), net_income = numeric(0), income_tax = numeric(0),
+                           work_income = numeric(0), JSP = numeric(0), PP_Pay = numeric(0), 
+                           RA = numeric(0), ES = numeric(0),
+                           taxable_benefit = numeric(0), gross_income = numeric(0),
+                           gross_fam_income = numeric(0), net_fam_a_income = numeric(0), 
+                           net_fam_b_income = numeric(0), HECS_payment <- numeric(0))
+for (hours in 0:max_hours) {
+  # Calculate net income and other variables for the given number of hours
+  calc_results <- calc_net_income_detailed(wage_rate, hours, HECS_on)
+  
+  # Append the results to the data frame
+  results_df <- rbind(results_df, cbind(hours, as.data.frame(t(unlist(calc_results)))))
+}
+results_df$income_tax <- results_df$income_tax * -1 
+results_df$HECS_payment <- results_df$HECS_payment * -1 
+results_df$taxable_benefit <- results_df$taxable_benefit * 26
+return(results_df)
+}
+
+incomes_data_hourly_highly_detailed <- highly_detailed_variable_calculator(wage)
+
+
+incomes_changes <- incomes_data_hourly_highly_detailed %>%
+  mutate(across(-hours, ~abs(. - lag(., default = first(.)))), .names = "change_{.col}") %>%
+  mutate(across(starts_with("change_"), ~if_else(row_number() == 1, 0, .)))
+
+incomes_ratios <- incomes_changes %>%
+  mutate(across(-c(hours, work_income, starts_with("change_"), .names),
+                ~if_else(work_income == 0, 0, ./work_income)))
+
+
+all_ratios_long <- pivot_longer(incomes_ratios, 
+                                cols = c(income_tax, RA, JSP, ES, PP_Pay,  net_fam_a_income, net_fam_b_income, HECS_payment),
+                                names_to = "income_type", 
+                                values_to = "amount")
+
+#all_ratios_long <- all_ratios_long %>%
+ # group_by(income_type) %>%
+#  filter(!(all(amount == 0))) %>%
+#  ungroup()
+
+
+all_ratios_long$income_type <- as.factor(all_ratios_long$income_type)
+levels(all_ratios_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                          "Job Seeker Payment", "Family Tax Benefit A", 
+                                          "Family Tax Benefit B", "Parenting Payment", 
+                                          "Commonwealth Rent Assistance", "Work Income")
+
+all_incomes_long$'Income Type' <- all_incomes_long$income_type
+
+all_incomes_long <- all_incomes_long %>%
+  mutate(Amount = round(Amount, 2))
+
+incomes_data_hourly_highly_detailed$'Net Income' <-  incomes_data_hourly_highly_detailed$net_income 
+
+# Creating the text string
+text_string <- paste("EMTRs for a", 
+                     ifelse(partnered == 1, "partnered", "unpartnered"), 
+                     ifelse(Home_owner == 1, "home owner", "renter"), 
+                     "earning $", wage, "an hour, with", Numb_dep, "children,") 
+
+# Append Parenting Payment Benefit eligibility
+if (PPeligible == 1 & Numb_dep > 0) {
+  text_string <- paste(text_string, "eligible for the Parenting Payment")
+} else if (PPeligible == 0 & Numb_dep > 0) {
+  text_string <- paste(text_string, ", not eligible for the Parenting Payment")
+}
+
+
+
+
+all_ratios_long$EMTR <- round(all_ratios_long$amount, 2)
+
+all_ratios_long$'Tax/Transfer' <- all_ratios_long$income_type
+
+# Plotting
+plot_EMTR_Highly_Detailed <- ggplot() +
+  geom_col(data = all_ratios_long, aes(x = hours, y = EMTR, fill = `Tax/Transfer`), width = 2) +
+  scale_colour_manual(values = c("Net Income" = "black")) +
+  labs_e61(title = text_string,
+           x = "Hours Worked",
+           y = "EMTR",
+           fill = "Income Type",
+           colour = "") + add_baseline()  + scale_fill_e61() + 
+  geom_hline(yintercept = 1, linetype = "dashed", col = "red") 
+
+#plot_EMTR_Highly_Detailed
+
+int_plot_EMTR_Highly_Detailed <- ggplotly(plot_EMTR_Highly_Detailed)
+
+ 
+#grid.arrange(plot_income_hourly, EMTR,  nrow = 1, ncol = 2)
+
+#grid.arrange(plot_income_highly_detailed,  plot_EMTR_Highly_Detailed,  nrow = 1, ncol = 2)
+
+#int_plot_income_highly_detailed 
+
+```
+
+## Incomes 
+
+Hover over plot to view details on taxes and transfers. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+int_plot_income_highly_detailed
+```
+
+
+
+## EMTRs 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+int_plot_EMTR_Highly_Detailed
+```
+
+
+## Example 2
+
+- Single Renter - Rent is $400 a fortnight. 
+- No Children
+- Earns $22 an hour, considering working up to 50 hours a week. 
+- Has 50,000 in HECS debt 
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#Add defaults for initial testing [this is written as calls below] ----
+  partnered <- 0
+  partner_earnings <- 0
+  over_60 <- 0
+  living_alone <- 1
+  Have_dep <- 0
+  Main_carer_dep <- 0
+  child_ages <- c()
+
+  Numb_dep <- 0
+  young_child <- 0
+
+  # Individual characteristics
+  Carer <- 0
+  Disability <- 0
+
+  # Housing status
+  Home_owner <- 0
+  Rent <- 400 # Fortnightly rent amount
+
+  # Labour market conditions
+  wage <- 22
+  max_hours <- 50
+
+  # Meets conditions to access benefit on a personal level
+  ben_eligibility <- 1
+
+  # Citation
+  cite <- "The world"
+
+
+## Setup the individuals characteristics based on user inputs ----
+# Define family characteristics
+  partnered <- as.numeric(partnered)
+  partner_earnings <- partner_earnings
+  over_60 <- as.numeric(over_60)
+  living_alone <- as.numeric(living_alone)
+  Have_dep <- as.numeric(Have_dep)
+  child_age <- child_ages
+  if (Main_carer_dep == 0){
+    child_age <- 99
+  }
+
+  Numb_dep <- length(child_age[child_age < 20])
+  young_child <- min(child_age)
+
+  PPeligible <- ifelse((young_child <= 6 | (young_child <= 8 & partnered == 0)) & Main_carer_dep == 1,1,0)
+
+  # Individual characteristics
+  Carer <- 0
+  Disability <- 0
+
+  # Housing status
+  Home_owner <- 0
+  Rent <- Rent # Fortnightly rent amount
+
+  # Labour market conditions
+  wage <- wage
+  max_hours <- max_hours
+
+  # Meets conditions to access benefit on a personal level
+  ben_eligibility <- 1
+  
+  #### HECS Debt (Set to 0 if no HECS Debt)
+
+  HECSDebt <- 50000
+  
+  #### Set to 0 to turn HECS repayments off 
+  
+  HECS_on <- 1
+  
+  ## Set up hourly income plots ----
+
+ #### Fully Detailed Calculation/breakdown
+
+highly_detailed_variable_calculator <- function(wage_rate) {
+  # Initialize an empty data frame to store results for each hour
+  results_df <- data.frame(hours = integer(0), net_income = numeric(0), income_tax = numeric(0),
+                           work_income = numeric(0), JSP = numeric(0), PP_Pay = numeric(0), 
+                           RA = numeric(0), ES = numeric(0),
+                           taxable_benefit = numeric(0), gross_income = numeric(0),
+                           gross_fam_income = numeric(0), net_fam_a_income = numeric(0), 
+                           net_fam_b_income = numeric(0), HECS_payment <- numeric(0))
+  
+  for (hours in seq(0, max_hours, by = 0.1)) {
+    # Calculate net income and other variables for the given number of hours
+    calc_results <- calc_net_income_detailed(wage_rate, hours, HECS_on)
+    
+    # Append the results to the data frame
+    results_df <- rbind(results_df, cbind(hours, as.data.frame(t(unlist(calc_results)))))
+  }
+  results_df$income_tax <- results_df$income_tax * -1 
+  results_df$HECS_payment <- results_df$HECS_payment * -1 
+  results_df$taxable_benefit <- results_df$taxable_benefit * 26
+  return(results_df)
+}
+
+incomes_data_hourly_highly_detailed <- highly_detailed_variable_calculator(wage)
+
+all_incomes_long <- pivot_longer(incomes_data_hourly_highly_detailed, 
+                                 cols = c(income_tax, work_income, RA, JSP, ES, PP_Pay,  net_fam_a_income, net_fam_b_income, HECS_payment),
+                                 names_to = "income_type", 
+                                 values_to = "Amount")
+
+#all_incomes_long <- all_incomes_long %>%
+#  group_by(income_type) %>%
+#  filter(!(all(amount == 0))) %>%
+#  ungroup()
+
+all_incomes_long$income_type <- as.factor(all_incomes_long$income_type)
+levels(all_incomes_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                          "Job Seeker Payment", "Family Tax Benefit A", 
+                                          "Family Tax Benefit B", "Parenting Payment", 
+                                          "Commonwealth Rent Assistance", "Work Income")
+
+all_incomes_long$'Income Type' <- all_incomes_long$income_type
+
+all_incomes_long <- all_incomes_long %>%
+  mutate(Amount = round(Amount, 2))
+
+incomes_data_hourly_highly_detailed$'Net Income' <-  incomes_data_hourly_highly_detailed$net_income 
+
+# Creating the text string
+text_string <- paste("Taxes and transfers for the", 
+                     ifelse(partnered == 1, "partnered", "unpartnered"), 
+                     ifelse(Home_owner == 1, "home owner", "renter")) 
+
+# Append Parenting Payment Benefit eligibility
+if (PPeligible == 1 & Numb_dep > 0) {
+  text_string <- paste(text_string, ",eligible for the Parenting Payment")
+} else if (PPeligible == 0 & Numb_dep > 0) {
+  text_string <- paste(text_string, ", not eligible for the Parenting Payment")
+}
+
+max_net_income <- max(incomes_data_hourly_highly_detailed$`Net Income`, na.rm = TRUE) * 1.4
+  min_amount <- min(all_incomes_long$Amount, na.rm = TRUE) * 1.4
+
+# Plotting
+plot_income_highly_detailed <- ggplot() +
+  geom_col(data = all_incomes_long, aes(x = hours, y = Amount  , fill = `Income Type`), width = 0.5 ) +
+  geom_line(data = incomes_data_hourly_highly_detailed, aes(x = hours, y = `Net Income` ), size = 2, col = "black") +
+  labs_e61(title = text_string,
+           x = "Hours worked",
+           y = "$",
+           fill = "Income Type",
+           colour = "") + add_baseline()  + scale_fill_e61() +
+  scale_x_continuous(expand = c(0, Inf), limits = c(0, max_hours - 0.2)) + # Remove default expansion for x-axis
+  scale_y_continuous(limits = c(min_amount, max_net_income))
+
+#plot_income_highly_detailed
+
+int_plot_income_highly_detailed <- ggplotly(plot_income_highly_detailed)
+#int_plot_income_highly_detailed 
+
+
+highly_detailed_variable_calculator <- function(wage_rate) {
+  # Initialize an empty data frame to store results for each hour
+  results_df <- data.frame(hours = integer(0), net_income = numeric(0), income_tax = numeric(0),
+                           work_income = numeric(0), JSP = numeric(0), PP_Pay = numeric(0), 
+                           RA = numeric(0), ES = numeric(0),
+                           taxable_benefit = numeric(0), gross_income = numeric(0),
+                           gross_fam_income = numeric(0), net_fam_a_income = numeric(0), 
+                           net_fam_b_income = numeric(0), HECS_payment <- numeric(0))
+for (hours in 0:max_hours) {
+  # Calculate net income and other variables for the given number of hours
+  calc_results <- calc_net_income_detailed(wage_rate, hours, HECS_on)
+  
+  # Append the results to the data frame
+  results_df <- rbind(results_df, cbind(hours, as.data.frame(t(unlist(calc_results)))))
+}
+results_df$income_tax <- results_df$income_tax * -1 
+results_df$HECS_payment <- results_df$HECS_payment * -1 
+results_df$taxable_benefit <- results_df$taxable_benefit * 26
+return(results_df)
+}
+
+incomes_data_hourly_highly_detailed <- highly_detailed_variable_calculator(wage)
+
+
+incomes_changes <- incomes_data_hourly_highly_detailed %>%
+  mutate(across(-hours, ~abs(. - lag(., default = first(.)))), .names = "change_{.col}") %>%
+  mutate(across(starts_with("change_"), ~if_else(row_number() == 1, 0, .)))
+
+incomes_ratios <- incomes_changes %>%
+  mutate(across(-c(hours, work_income, starts_with("change_"), .names),
+                ~if_else(work_income == 0, 0, ./work_income)))
+
+
+all_ratios_long <- pivot_longer(incomes_ratios, 
+                                cols = c(income_tax, RA, JSP, ES, PP_Pay,  net_fam_a_income, net_fam_b_income, HECS_payment),
+                                names_to = "income_type", 
+                                values_to = "amount")
+
+#all_ratios_long <- all_ratios_long %>%
+ # group_by(income_type) %>%
+#  filter(!(all(amount == 0))) %>%
+#  ungroup()
+
+
+all_ratios_long$income_type <- as.factor(all_ratios_long$income_type)
+levels(all_ratios_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                          "Job Seeker Payment", "Family Tax Benefit A", 
+                                          "Family Tax Benefit B", "Parenting Payment", 
+                                          "Commonwealth Rent Assistance", "Work Income")
+
+all_incomes_long$'Income Type' <- all_incomes_long$income_type
+
+all_incomes_long <- all_incomes_long %>%
+  mutate(Amount = round(Amount, 2))
+
+incomes_data_hourly_highly_detailed$'Net Income' <-  incomes_data_hourly_highly_detailed$net_income 
+
+# Creating the text string
+text_string <- paste("EMTRs for a", 
+                     ifelse(partnered == 1, "partnered", "unpartnered"), 
+                     ifelse(Home_owner == 1, "home owner", "renter"), 
+                     "earning $", wage, "an hour, with", Numb_dep, "children,") 
+
+# Append Parenting Payment Benefit eligibility
+if (PPeligible == 1 & Numb_dep > 0) {
+  text_string <- paste(text_string, "eligible for the Parenting Payment")
+} else if (PPeligible == 0 & Numb_dep > 0) {
+  text_string <- paste(text_string, ", not eligible for the Parenting Payment")
+}
+
+
+
+
+
+all_ratios_long$EMTR <- round(all_ratios_long$amount, 2)
+
+all_ratios_long$'Tax/Transfer' <- all_ratios_long$income_type
+
+# Plotting
+plot_EMTR_Highly_Detailed <- ggplot() +
+  geom_col(data = all_ratios_long, aes(x = hours, y = EMTR, fill = `Tax/Transfer`), width = 2) +
+  scale_colour_manual(values = c("Net Income" = "black")) +
+  labs_e61(title = text_string,
+           x = "Hours Worked",
+           y = "EMTR",
+           fill = "Income Type",
+           colour = "") + add_baseline()  + scale_fill_e61() + 
+  geom_hline(yintercept = 1, linetype = "dashed", col = "red") 
+
+#plot_EMTR_Highly_Detailed
+
+int_plot_EMTR_Highly_Detailed <- ggplotly(plot_EMTR_Highly_Detailed)
+
+ 
+#grid.arrange(plot_income_hourly, EMTR,  nrow = 1, ncol = 2)
+
+#grid.arrange(plot_income_highly_detailed,  plot_EMTR_Highly_Detailed,  nrow = 1, ncol = 2)
+
+#int_plot_income_highly_detailed 
+
+```
+
+## Incomes 
+
+Hover over plot to view details on taxes and transfers. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+int_plot_income_highly_detailed
+```
+
+
+
+## EMTRs 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+int_plot_EMTR_Highly_Detailed
+```
+
+
+
+
+
+## Example 3
+
+- Single Home Owner 
+- 4 Children Aged 1,3,5,7. 
+- Earns $34 an hour, considering working up to 60 hours a week. 
+- Has 1,000 in HECS debt 
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#Add defaults for initial testing [this is written as calls below] ----
+  partnered <- 0
+  partner_earnings <- 0
+  over_60 <- 0
+  living_alone <- 1
+  Have_dep <- 1
+  Main_carer_dep <- 1
+  child_ages <- c(1, 3,5,7)
+
+  Numb_dep <- 4
+  young_child <- 1
+
+  # Individual characteristics
+  Carer <- 0
+  Disability <- 0
+
+  # Housing status
+  Home_owner <- 1
+  Rent <- 400 # Fortnightly rent amount
+
+  # Labour market conditions
+  wage <- 34
+  max_hours <- 60
+
+  # Meets conditions to access benefit on a personal level
+  ben_eligibility <- 1
+
+  # Citation
+  cite <- "The world"
+
+
+## Setup the individuals characteristics based on user inputs ----
+# Define family characteristics
+  partnered <- as.numeric(partnered)
+  partner_earnings <- partner_earnings
+  over_60 <- as.numeric(over_60)
+  living_alone <- as.numeric(living_alone)
+  Have_dep <- as.numeric(Have_dep)
+  child_age <- child_ages
+  if (Main_carer_dep == 0){
+    child_age <- 99
+  }
+
+  Numb_dep <- length(child_age[child_age < 20])
+  young_child <- min(child_age)
+
+  PPeligible <- ifelse((young_child <= 6 | (young_child <= 8 & partnered == 0)) & Main_carer_dep == 1,1,0)
+
+  # Individual characteristics
+  Carer <- 0
+  Disability <- 0
+
+  # Housing status
+  Home_owner <- 1
+  Rent <- Rent # Fortnightly rent amount
+
+  # Labour market conditions
+  wage <- wage
+  max_hours <- max_hours
+
+  # Meets conditions to access benefit on a personal level
+  ben_eligibility <- 1
+  
+  #### HECS Debt (Set to 0 if no HECS Debt)
+
+  HECSDebt <- 1000
+  
+  #### Set to 0 to turn HECS repayments off 
+  
+  HECS_on <- 1
+  
+  ## Set up hourly income plots ----
+
+ #### Fully Detailed Calculation/breakdown
+
+highly_detailed_variable_calculator <- function(wage_rate) {
+  # Initialize an empty data frame to store results for each hour
+  results_df <- data.frame(hours = integer(0), net_income = numeric(0), income_tax = numeric(0),
+                           work_income = numeric(0), JSP = numeric(0), PP_Pay = numeric(0), 
+                           RA = numeric(0), ES = numeric(0),
+                           taxable_benefit = numeric(0), gross_income = numeric(0),
+                           gross_fam_income = numeric(0), net_fam_a_income = numeric(0), 
+                           net_fam_b_income = numeric(0), HECS_payment <- numeric(0))
+  
+  for (hours in seq(0, max_hours, by = 0.1)) {
+    # Calculate net income and other variables for the given number of hours
+    calc_results <- calc_net_income_detailed(wage_rate, hours, HECS_on)
+    
+    # Append the results to the data frame
+    results_df <- rbind(results_df, cbind(hours, as.data.frame(t(unlist(calc_results)))))
+  }
+  results_df$income_tax <- results_df$income_tax * -1 
+  results_df$HECS_payment <- results_df$HECS_payment * -1 
+  results_df$taxable_benefit <- results_df$taxable_benefit * 26
+  return(results_df)
+}
+
+incomes_data_hourly_highly_detailed <- highly_detailed_variable_calculator(wage)
+
+all_incomes_long <- pivot_longer(incomes_data_hourly_highly_detailed, 
+                                 cols = c(income_tax, work_income, RA, JSP, ES, PP_Pay,  net_fam_a_income, net_fam_b_income, HECS_payment),
+                                 names_to = "income_type", 
+                                 values_to = "Amount")
+
+#all_incomes_long <- all_incomes_long %>%
+#  group_by(income_type) %>%
+#  filter(!(all(amount == 0))) %>%
+#  ungroup()
+
+all_incomes_long$income_type <- as.factor(all_incomes_long$income_type)
+levels(all_incomes_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                          "Job Seeker Payment", "Family Tax Benefit A", 
+                                          "Family Tax Benefit B", "Parenting Payment", 
+                                          "Commonwealth Rent Assistance", "Work Income")
+
+all_incomes_long$'Income Type' <- all_incomes_long$income_type
+
+all_incomes_long <- all_incomes_long %>%
+  mutate(Amount = round(Amount, 2))
+
+incomes_data_hourly_highly_detailed$'Net Income' <-  incomes_data_hourly_highly_detailed$net_income 
+
+# Creating the text string
+text_string <- paste("Taxes and transfers for the", 
+                     ifelse(partnered == 1, "partnered", "unpartnered"), 
+                     ifelse(Home_owner == 1, "home owner", "renter")) 
+
+# Append Parenting Payment Benefit eligibility
+if (PPeligible == 1 & Numb_dep > 0) {
+  text_string <- paste(text_string, ",eligible for the Parenting Payment")
+} else if (PPeligible == 0 & Numb_dep > 0) {
+  text_string <- paste(text_string, ", not eligible for the Parenting Payment")
+}
+
+
+max_net_income <- max(incomes_data_hourly_highly_detailed$`Net Income`, na.rm = TRUE) * 1.4
+  min_amount <- min(all_incomes_long$Amount, na.rm = TRUE) * 1.4
+
+
+# Plotting
+plot_income_highly_detailed <- ggplot() +
+  geom_col(data = all_incomes_long, aes(x = hours, y = Amount  , fill = `Income Type`), width = 0.5 ) +
+  geom_line(data = incomes_data_hourly_highly_detailed, aes(x = hours, y = `Net Income` ), size = 2, col = "black") +
+  labs_e61(title = text_string,
+           x = "Hours worked",
+           y = "$",
+           fill = "Income Type",
+           colour = "") + add_baseline()  + scale_fill_e61() +
+  scale_x_continuous(expand = c(0, Inf)) + # Remove default expansion for x-axis
+  scale_y_continuous(expand = c(0, 0), limits = c(min_amount, max_net_income)) 
+
+#plot_income_highly_detailed
+
+int_plot_income_highly_detailed <- ggplotly(plot_income_highly_detailed)
+#int_plot_income_highly_detailed 
+
+
+highly_detailed_variable_calculator <- function(wage_rate) {
+  # Initialize an empty data frame to store results for each hour
+  results_df <- data.frame(hours = integer(0), net_income = numeric(0), income_tax = numeric(0),
+                           work_income = numeric(0), JSP = numeric(0), PP_Pay = numeric(0), 
+                           RA = numeric(0), ES = numeric(0),
+                           taxable_benefit = numeric(0), gross_income = numeric(0),
+                           gross_fam_income = numeric(0), net_fam_a_income = numeric(0), 
+                           net_fam_b_income = numeric(0), HECS_payment <- numeric(0))
+for (hours in 0:max_hours) {
+  # Calculate net income and other variables for the given number of hours
+  calc_results <- calc_net_income_detailed(wage_rate, hours, HECS_on)
+  
+  # Append the results to the data frame
+  results_df <- rbind(results_df, cbind(hours, as.data.frame(t(unlist(calc_results)))))
+}
+results_df$income_tax <- results_df$income_tax * -1 
+results_df$HECS_payment <- results_df$HECS_payment * -1 
+results_df$taxable_benefit <- results_df$taxable_benefit * 26
+return(results_df)
+}
+
+incomes_data_hourly_highly_detailed <- highly_detailed_variable_calculator(wage)
+
+
+incomes_changes <- incomes_data_hourly_highly_detailed %>%
+  mutate(across(-hours, ~abs(. - lag(., default = first(.)))), .names = "change_{.col}") %>%
+  mutate(across(starts_with("change_"), ~if_else(row_number() == 1, 0, .)))
+
+incomes_ratios <- incomes_changes %>%
+  mutate(across(-c(hours, work_income, starts_with("change_"), .names),
+                ~if_else(work_income == 0, 0, ./work_income)))
+
+
+all_ratios_long <- pivot_longer(incomes_ratios, 
+                                cols = c(income_tax, RA, JSP, ES, PP_Pay,  net_fam_a_income, net_fam_b_income, HECS_payment),
+                                names_to = "income_type", 
+                                values_to = "amount")
+
+#all_ratios_long <- all_ratios_long %>%
+ # group_by(income_type) %>%
+#  filter(!(all(amount == 0))) %>%
+#  ungroup()
+
+
+all_ratios_long$income_type <- as.factor(all_ratios_long$income_type)
+levels(all_ratios_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                          "Job Seeker Payment", "Family Tax Benefit A", 
+                                          "Family Tax Benefit B", "Parenting Payment", 
+                                          "Commonwealth Rent Assistance", "Work Income")
+
+all_incomes_long$'Income Type' <- all_incomes_long$income_type
+
+all_incomes_long <- all_incomes_long %>%
+  mutate(Amount = round(Amount, 2))
+
+incomes_data_hourly_highly_detailed$'Net Income' <-  incomes_data_hourly_highly_detailed$net_income 
+
+# Creating the text string
+text_string <- paste("EMTRs for a", 
+                     ifelse(partnered == 1, "partnered", "unpartnered"), 
+                     ifelse(Home_owner == 1, "home owner", "renter"), 
+                     "earning $", wage, "an hour, with", Numb_dep, "children,") 
+
+# Append Parenting Payment Benefit eligibility
+if (PPeligible == 1 & Numb_dep > 0) {
+  text_string <- paste(text_string, "eligible for the Parenting Payment")
+} else if (PPeligible == 0 & Numb_dep > 0) {
+  text_string <- paste(text_string, ", not eligible for the Parenting Payment")
+}
+
+
+
+
+all_ratios_long$EMTR <- round(all_ratios_long$amount, 2)
+
+all_ratios_long$'Tax/Transfer' <- all_ratios_long$income_type
+
+# Plotting
+plot_EMTR_Highly_Detailed <- ggplot() +
+  geom_col(data = all_ratios_long, aes(x = hours, y = EMTR, fill = `Tax/Transfer`), width = 2) +
+  scale_colour_manual(values = c("Net Income" = "black")) +
+  labs_e61(title = text_string,
+           x = "Hours Worked",
+           y = "EMTR",
+           fill = "Income Type",
+           colour = "") + add_baseline()  + scale_fill_e61() + 
+  geom_hline(yintercept = 1, linetype = "dashed", col = "red") 
+
+#plot_EMTR_Highly_Detailed
+
+int_plot_EMTR_Highly_Detailed <- ggplotly(plot_EMTR_Highly_Detailed)
+
+ 
+#grid.arrange(plot_income_hourly, EMTR,  nrow = 1, ncol = 2)
+
+#grid.arrange(plot_income_highly_detailed,  plot_EMTR_Highly_Detailed,  nrow = 1, ncol = 2)
+
+#int_plot_income_highly_detailed 
+
+```
+
+## Incomes 
+
+Hover over plot to view details on taxes and transfers. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+int_plot_income_highly_detailed
+```
+
+
+
+## EMTRs 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+int_plot_EMTR_Highly_Detailed
+```
+
+
+
+
+
+

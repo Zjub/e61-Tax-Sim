@@ -41,7 +41,7 @@ for (i in 1:nrow(policy_parameters_1)){
 
 #Add defaults for initial testing [this is written as calls below] ----
   partnered <- 1
-  partner_earnings <- 0
+  partner_earnings <- 80000
   over_60 <- 0
   living_alone <- 0
   Have_dep <- 1
@@ -60,7 +60,7 @@ for (i in 1:nrow(policy_parameters_1)){
   Rent <- 900 # Fortnightly rent amount
 
   # Labour market conditions
-  wage <- 30
+  wage <- 35
   max_hours <- 60
 
   # Meets conditions to access benefit on a personal level
@@ -209,8 +209,11 @@ for (i in 1:nrow(policy_parameters_1)){
   plot_income_highly_detailed_PI
   
   
+ 
+  ##### Family Household income 
   
   
+  calc_net_income_detailed_private( partner_earnings, HECS_on)$work_income
   
   
   

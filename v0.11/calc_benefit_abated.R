@@ -17,6 +17,11 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
   JSPabate = abate 
   PPabate = abate 
   
+  JSP_S_ND_arate <- c(0,JSP_S_ND_arate_1,JSP_S_ND_arate_2)
+  JSP_S_ND_athresh <- c(0,JSP_S_ND_athresh_1,JSP_S_ND_athresh_2)
+  
+  
+  
   PP_S_athresh <- NA 
   
   if (Numb_dep <= 0) {
