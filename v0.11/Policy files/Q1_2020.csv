@@ -26,41 +26,41 @@ calc_income_tax,BRL_thresh,180000,year,Budget Repair Levy threshold
 calc_income_tax,BRL_rate,0.02,year,Budget Repair Levy rate
 calc_income_tax,BTO_thresh,6000,year,Beneficiary tax offset threshold
 calc_income_tax,BTO_rate,0.15,year,Beneficiary tax offset rate
-calc_rent_assistance,rent_max_single_la,305.33,fortnight,Rent ceiling single no dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_single_la,122.4,fortnight,Rent threshold single no dependents (min rent to be eligible for rent assistance)
-calc_rent_assistance,rent_max_single_share,244.36,fortnight,Rent ceiling single shared no dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_single_share,91.47,fortnight,Rent threshold single shared no dependents (min rent to be eligible for rent assistance)
-calc_rent_assistance,rent_max_couple,370.47,fortnight,Rent ceiling couple no dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_max_single_la,307.2,fortnight,Rent ceiling single no dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_la,123.2,fortnight,Rent threshold single no dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_single_share,245.87,fortnight,Rent ceiling single shared no dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_share,92,fortnight,Rent threshold single shared no dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_couple,372.73,fortnight,Rent ceiling couple no dependents (lowest rent that provides the max rental assistance payment)
 calc_rent_assistance,rent_min_couple,198.2,fortnight,Rent threshold couple no dependents (min rent to be eligible for rent assistance)
-calc_rent_assistance,rent_max_single_dep1,375.43,fortnight,Rent ceiling single 1-2 dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_single_dep1,160.58,fortnight,Rent threshold single 1-2 dependents (min rent to be eligible for rent assistance)
-calc_rent_assistance,rent_max_couple_dep1,452.57,fortnight,Rent ceiling couple 1-2 dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_couple_dep1,237.72,fortnight,Rent threshold couple 1-2 dependents (min rent to be eligible for rent assistance)
-calc_rent_assistance,rent_max_single_dep3,403.25,fortnight,Rent ceiling single 3+ dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_single_dep3,160.58,fortnight,Rent threshold single 3+ dependents (min rent to be eligible for rent assistance)
-calc_rent_assistance,rent_max_couple_dep3,480.39,fortnight,Rent ceiling couple 3+ dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_couple_dep3,237.72,fortnight,Rent threshold couple 3+ dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_single_dep1,377.72,fortnight,Rent ceiling single 1-2 dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_dep1,161.56,fortnight,Rent threshold single 1-2 dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_couple_dep1,455.28,fortnight,Rent ceiling couple 1-2 dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_couple_dep1,239.12,fortnight,Rent threshold couple 1-2 dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_single_dep3,405.72,fortnight,Rent ceiling single 3+ dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_dep3,161.56,fortnight,Rent threshold single 3+ dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_couple_dep3,483.28,fortnight,Rent ceiling couple 3+ dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_couple_dep3,239.12,fortnight,Rent threshold couple 3+ dependents (min rent to be eligible for rent assistance)
 calc_rent_assistance,ra_rate,0.75,fortnight,Rental Assistance given per dollar of rent between the threshold and ceiling.
 calc_energy_supp,energy_partnered,7.9,fortnight,JSP Energy Supplement for coupled individual
 calc_energy_supp,energy_single,8.8,fortnight,JSP Energy Supplement for single no dependent individual
 calc_energy_supp,energy_over60,9.5,fortnight,JSP Energy Supplement for over 60 individual
 calc_energy_supp,energy_single_dep,9.5,fortnight,JSP Energy Supplement for single with dependent(s) individual
 calc_main_benefit,JSP_S_ND_pay,555.7,fortnight,JSP Basic Rate Single no dependent
-calc_main_benefit,JSP_S_D_pay,601.1,fortnight,JSP Basic Rate Single with dependent(s)
-calc_main_benefit,JSP_S_Age_pay,601.1,fortnight,JSP over 60 Rate Single
-calc_main_benefit,JSP_C_ND_pay,501.7,fortnight,JSP Basic Rate Coupled no dependent
-calc_main_benefit,JSP_C_D_pay,501.7,fortnight,JSP Basic Rate Coupled with dependent(s)
+calc_main_benefit,JSP_S_D_pay,604.7,fortnight,JSP Basic Rate Single with dependent(s)
+calc_main_benefit,JSP_S_Age_pay,604.7,fortnight,JSP over 60 Rate Single
+calc_main_benefit,JSP_C_ND_pay,504.7,fortnight,JSP Basic Rate Coupled no dependent
+calc_main_benefit,JSP_C_D_pay,504.7,fortnight,JSP Basic Rate Coupled with dependent(s)
 calc_main_benefit,JSP_S_ND_arate_1,0.5,fortnight,JSP First abatement rate Single no dependent
 calc_main_benefit,JSP_S_ND_arate_2,0.6,fortnight,JSP Second abatement rate Single no dependent
 calc_main_benefit,JSP_S_ND_athresh_1,104,fortnight,JSP First abatement threshold Single no dependent
 calc_main_benefit,JSP_S_ND_athresh_2,254,fortnight,JSP Second abatement threshold Single no dependent
-calc_main_benefit,PP_S_pay,776.1,fortnight,Parenting Payment Single amount
-calc_main_benefit,PP_C_pay,501.7,fortnight,Parenting Payment Couple amount
+calc_main_benefit,PP_S_pay,780.7,fortnight,Parenting Payment Single amount
+calc_main_benefit,PP_C_pay,504.7,fortnight,Parenting Payment Couple amount
 calc_main_benefit,PP_S_athresh_base,188.6,fortnight,"PPS abatement threshold, one child"
 calc_main_benefit,PP_S_athresh_2,213.2,fortnight,"PPS abatement threshold, two children"
 calc_main_benefit,PP_S_athresh_3,237.8,fortnight,"PPS abatement threshold, three children"
 calc_main_benefit,PP_S_athresh_mult,24.6,fortnight,"PPS increase in abatement, per extra child"
-calc_main_benefit,PP_C_P_Threshold,979,fortnight,PPC Partner Income Threshold
+calc_main_benefit,PP_C_P_Threshold,984,fortnight,PPC Partner Income Threshold
 calc_main_benefit,PP_C_I_Threshold_1,104,fortnight,PPC Individual Income Threshold 1 
 calc_main_benefit,PP_C_I_Threshold_2,254,fortnight,PPC Individual Income Threshold 2
 calc_main_benefit,PP_S_arate,0.4,fortnight,PPS abatement rate
