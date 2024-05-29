@@ -40,7 +40,7 @@ for (i in 1:nrow(policy_parameters_1)){
 
 
 ###################################Add defaults for initial testing [this is written as calls below] ----
-  partnered <- 1
+  partnered <- 0
   partner_earnings <- 10000
   over_60 <- 0
   living_alone <- 0
@@ -56,7 +56,7 @@ for (i in 1:nrow(policy_parameters_1)){
   Disability <- 0
 
   # Housing status
-  Home_owner <- 1
+  Home_owner <- 0
   Rent <- 900 # Fortnightly rent amount
 
   # Labour market conditions
@@ -114,6 +114,7 @@ for (i in 1:nrow(policy_parameters_1)){
   
   max_private_earnings <- 100
   
+  SIH_charts_on <- 1 
   
   ################################################ Produce charts 
   

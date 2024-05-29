@@ -400,11 +400,12 @@ calc_income_or_hours <- function(income_or_hours){
             
             # Display the interactive combined plot
             print(interactive_combined_plot)
-            
+       if (SIH_charts_on == 1){   
+         tryCatch( {
        SIH_backing_data <- read.csv("SIH_backing_data.csv")
        
        variables <- c("over_60", "partnered", "living_alone", "Home_owner", 
-                      "young_child", "Numb_dep", "Have_dep", "Main_carer_dep", 
+                       "Numb_dep", "Have_dep", "Main_carer_dep", 
                       "PPeligible")
        
        # Function to filter the data frame
@@ -494,6 +495,13 @@ calc_income_or_hours <- function(income_or_hours){
       )
      
      print(chart)
+         }, 
+     error = function(e) {
+       # Handle the error
+       print("Error producing SIH charts")
+       
+     } ) 
+       }
           }
           }
   
