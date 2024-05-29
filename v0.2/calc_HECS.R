@@ -13,9 +13,6 @@ calc_HECS <- function(gross_income) {
   HECS_scale <- c(0) # Start with 0
   
   
-  threshold_vars <- grep("^HECS_Threshold_", all_vars, value = TRUE)
-  num_thresholds <- length(threshold_vars)
-  
   for (i in 1:num_thresholds) {
     HECS_brackets <- c(HECS_brackets, get(paste("HECS_Threshold_", i, sep = "")))
     HECS_scale <- c(HECS_scale, get(paste("HECS_Rate", i, sep = "")))

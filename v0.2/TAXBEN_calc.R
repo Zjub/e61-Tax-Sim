@@ -29,7 +29,7 @@ for (script in scripts){
 
 # Import parameters for the given quarter ----
 
-policy_date1 <- "Q1_2023" # XXXX Replace this with a function call.
+policy_date1 <- "Q3_2023" # XXXX Replace this with a function call.
 
 policy_parameters_1 <- policy_parameters(policy_date1)
 
@@ -46,7 +46,7 @@ for (i in 1:nrow(policy_parameters_1)){
   living_alone <- 0
   Have_dep <- 1
   Main_carer_dep <- 1
-  child_ages <- c(1,9)
+  child_ages <- c(5,15)
 
   Numb_dep <- 0
   young_child <- 0
@@ -56,7 +56,7 @@ for (i in 1:nrow(policy_parameters_1)){
   Disability <- 0
 
   # Housing status
-  Home_owner <- 0
+  Home_owner <- 1
   Rent <- 900 # Fortnightly rent amount
 
   # Labour market conditions
@@ -112,7 +112,7 @@ for (i in 1:nrow(policy_parameters_1)){
   Medicare_levy_on <- 1
   RA_Abate <- 1 
   
-  max_private_earnings <- 90
+  max_private_earnings <- 100
   
   
   ################################################ Produce charts 

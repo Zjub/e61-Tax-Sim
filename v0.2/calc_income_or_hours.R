@@ -262,8 +262,8 @@ calc_income_or_hours <- function(income_or_hours){
               text_string <- paste(text_string, ", not eligible for the Parenting Payment")
             }
             
-            max_net_income <- max(incomes_data_hourly_highly_detailed$net_income, na.rm = TRUE) 
-            - min(incomes_data_hourly_highly_detailed$income_tax, na.rm = TRUE)
+            max_net_income <- max(incomes_data_private_highly_detailed$net_income, na.rm = TRUE) 
+            - min(incomes_data_private_highly_detailed$income_tax, na.rm = TRUE)
             
             min_amount <- min(all_incomes_long$Amount, na.rm = TRUE) * 1.4
             
@@ -285,7 +285,14 @@ calc_income_or_hours <- function(income_or_hours){
                        y = "$ (000s)",
                        fill = "Income Type",
                        colour = "") + add_baseline()  + scale_fill_e61() +
-              scale_x_continuous(expand = c(0, Inf)) #+ # Remove default expansion for x-axis
+              scale_x_continuous(expand = c(0, Inf)) + 
+              scale_fill_manual(values = c("Energy Supplement" = e61_tealdark, "HECS Payment" = e61_bluedark,
+                                "Income Tax" = e61_greydark, 
+                                "Job Seeker Payment" = e61_bluelight, "Medicare Levy" = e61_coraldark , 
+                                "Family Tax Benefit A" = e61_corallight, 
+                                "Family Tax Benefit B" = e61_maroondark, "Parenting Payment" = e61_orangedark, 
+                                "Commonwealth Rent Assistance" = e61_orangelight, "Work Income" = e61_teallight)) 
+            #+ # Remove default expansion for x-axis
              # scale_y_continuous(expand = c(0, 0), limits =c(min_amount, max_net_income)) 
             
             ######################################################################################
@@ -311,7 +318,7 @@ calc_income_or_hours <- function(income_or_hours){
                                             values_to = "amount")
             
             all_ratios_long$income_type <- as.factor(all_ratios_long$income_type)
-            levels(all_incomes_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
+            levels(all_ratios_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
                                                       "Job Seeker Payment", "Medicare Levy", 
                                                       "Family Tax Benefit A", 
                                                       "Family Tax Benefit B", "Parenting Payment", 
@@ -366,9 +373,10 @@ calc_income_or_hours <- function(income_or_hours){
                                                    y = EMTR, fill = `Tax/Transfer`),
                        width = 2) +
               geom_line(data = all_ratios_long, aes(x = `Private Income (000s)`, y = `Total EMTR` ), 
-              col = "black", size = 2 ) + 
-              geom_line(data = incomes_data_private_highly_detailed, aes( x = `Private Income (000s)`, y = `Average Tax Rate`),
-                        col = "black", size = 2) + 
+              col = "black" ) + 
+              geom_line(data = incomes_data_private_highly_detailed, aes( x = `Private Income (000s)`,
+                                                                          y = `Average Tax Rate`),
+                        col = "grey", linetype = "dashed") + 
               scale_colour_manual(values = c("Net Income" = "black")) +
               labs_e61(title = "Earnings Schedule (left) and Effective Marginal Tax Rate from
                        Earning an Additional $1000 of Private Income (right)",
@@ -376,7 +384,13 @@ calc_income_or_hours <- function(income_or_hours){
                        y = "EMTR",
                        fill = "Income Type",
                        colour = "") + add_baseline()  + scale_fill_e61() + 
-              geom_hline(yintercept = 1, linetype = "dashed", col = "red") 
+              geom_hline(yintercept = 1, linetype = "dashed", col = "red") + 
+              scale_fill_manual(values = c("Energy Supplement" = e61_tealdark,
+                                           "HECS Payment" = e61_bluedark, "Income Tax" = e61_greydark, 
+                                 "Job Seeker Payment" = e61_bluelight, "Medicare Levy" = e61_coraldark , 
+                                 "Family Tax Benefit A" = e61_corallight, 
+                                 "Family Tax Benefit B" = e61_maroondark, "Parenting Payment" = e61_orangedark, 
+                                 "Commonwealth Rent Assistance" = e61_orangelight))
             
             Hours_Schedule <- ggplotly(Hours_Schedule)
             EMTR_Schedule <- ggplotly(EMTR_Schedule)
@@ -387,7 +401,99 @@ calc_income_or_hours <- function(income_or_hours){
             # Display the interactive combined plot
             print(interactive_combined_plot)
             
-            
+       SIH_backing_data <- read.csv("SIH_backing_data.csv")
+       
+       variables <- c("over_60", "partnered", "living_alone", "Home_owner", 
+                      "young_child", "Numb_dep", "Have_dep", "Main_carer_dep", 
+                      "PPeligible")
+       
+       # Function to filter the data frame
+       filter_data <- function(data, variables) {
+         filter_expr <- paste(sapply(variables, function(var) {
+           value <- get(var, envir = .GlobalEnv)
+           paste0(var, " == ", value)
+         }), collapse = " & ")
+         
+         subset(data, eval(parse(text = filter_expr)))
+       }
+       
+       # Subset the SIH_backing_data
+       SIH_backing_data_filtered <- filter_data(SIH_backing_data, variables)
+       
+       SIH_backing_data_filtered$`Private Income (000s)` <- SIH_backing_data_filtered$IWSSUCP8 * 52 / 1000
+       
+    
+       SIH_backing_data_filtered <- SIH_backing_data_filtered %>%
+         mutate(`Private Income (000s)` = floor(`Private Income (000s)`))
+       
+       # Group by the new variable and find the maximum sum of SIHPSWT
+       Australians <- SIH_backing_data_filtered %>%
+         group_by(`Private Income (000s)`) %>%
+         summarise(Australians = sum(SIHPSWT, na.rm = TRUE) / 1000) 
+       
+       ratio <- 
+        ( max(incomes_data_private_highly_detailed$`Net Income`) / 1000) / max(Australians$Australians) * 1.25  
+       
+       
+      Aus_Income_Schedule <-  ggplot() +
+         geom_col(data = Australians, aes(x = `Private Income (000s)`, y = Australians), 
+                         fill = e61_tealdark, alpha = 0.7) +
+         geom_line(data = incomes_data_private_highly_detailed, 
+                   aes(x = `Private Income (000s)`, y = sec_rescale_inv( `Net Income` / 1000,
+                                                                         scale =  ratio)), 
+                   size = 1, color = "black")  +
+         labs_e61(title = NULL,
+              x = "Private Income (000s)", y = "People (000s)")  + 
+         scale_y_continuous_e61(sec_axis = sec_axis(~sec_rescale(., scale = ratio),
+                                            name = "Inc (000s)"), 
+                                limits = c(0, max(Australians$Australians) * 1.1)) +
+        xlim(-1,  max_private_earnings) +
+        plot_label(c("Net \nIncome (RHS)", "People (LHS)"), 
+                   c(0.75 * max_private_earnings,
+                     0.75 * max_private_earnings), 
+                   c(0.975 * max(Australians$Australians), 
+                     0.85 * max(Australians$Australians) ), 
+                   c("black", e61_tealdark)) 
+    
+      
+      
+      ratio2 <- 
+        max(all_ratios_long$`Total EMTR`) /
+        max(Australians$Australians) * 1.25  
+      
+      
+      Aus_EMTR_Schedule <-  ggplot() +
+        geom_col(data = Australians, aes(x = `Private Income (000s)`, y = Australians), 
+                 fill = e61_tealdark, alpha = 0.7) +
+        geom_line(data = all_ratios_long, aes(x = `Private Income (000s)`, 
+                                              y = sec_rescale_inv( `Total EMTR`, scale =  ratio2)), 
+                  size = 1, color = "black")  +
+        labs_e61(title = NULL,
+                 x = "Private Inc (000s)", y = "People (000s)")  + 
+        scale_y_continuous_e61(sec_axis = sec_axis(~sec_rescale(., scale = ratio2),
+                                                   name = "Total EMTR"), 
+                               limits = c(0, max(Australians$Australians) * 1.1)) +
+        xlim(-1,  max_private_earnings) +
+        plot_label(c("EMTR (RHS)", "People (LHS)"), 
+                   c(0.75 * max_private_earnings,
+                     0.75 * max_private_earnings), 
+                   c(0.95 * max(Australians$Australians), 
+                     0.9 * max(Australians$Australians) ), 
+                   c("black", e61_tealdark)) 
+      
+      
+      title_grob <- grid::textGrob("Where do Australians with the same characteristics sit?",
+                                   gp = grid::gpar(fontsize = 16, fontface = "bold"))
+      
+      # Arrange the plots with a common title
+     chart <-  gridExtra::grid.arrange(
+        title_grob,
+        gridExtra::arrangeGrob(Aus_Income_Schedule, Aus_EMTR_Schedule, ncol = 2),
+        nrow = 2,
+        heights = c(0.1, 0.9)  # Adjust heights to allocate space for the title
+      )
+     
+     print(chart)
           }
           }
   
