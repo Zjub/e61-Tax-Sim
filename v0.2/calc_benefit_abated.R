@@ -116,8 +116,8 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
   ES <- ifelse(net_fam_a_flag == 1, 0,  calc_benefit_gross()[["ES"]])
   
   
-  
-  JSP <-   calc_benefit_gross()[["JSP_Pay"]] + work_for_the_dole
+  JSP <-  calc_benefit_gross()[["JSP_Pay"]]
+  JSP <-   ifelse( JSP > 0, calc_benefit_gross()[["JSP_Pay"]] + work_for_the_dole , JSP)
   PP_Pay <-  calc_benefit_gross()[["PP_Pay"]]
   
   ### See what proportion of the benefits we need to abate (evenly)
