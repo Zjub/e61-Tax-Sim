@@ -1,73 +1,131 @@
-function,Parameter,Value,period
-calc_income_tax,tax_free,18200,year
-calc_income_tax,tax_threshold_1,45000,year
-calc_income_tax,tax_threshold_2,120000,year
-calc_income_tax,tax_threshold_3,180000,year
-calc_income_tax,tax_rate_1,0.19,year
-calc_income_tax,tax_rate_2,0.325,year
-calc_income_tax,tax_rate_3,0.37,year
-calc_income_tax,tax_rate_4,0.45,year
-calc_income_tax,LITO_on,1,year
-calc_income_tax,LITO_thresh_1,37500,year
-calc_income_tax,LITO_thresh_2,45000,year
-calc_income_tax,LITO_gross,700,year
-calc_income_tax,LITO_rate_1,0.005,year
-calc_income_tax,LITO_rate_2,0.015,year
-calc_income_tax,LMITO_on,0,year
-calc_income_tax,LMITO_thresh_1,37000,year
-calc_income_tax,LMITO_thresh_2,48000,year
-calc_income_tax,LMITO_thresh_3,90000,year
-calc_income_tax,LMITO_gross,255,year
-calc_income_tax,LMITO_inc_rate,0.075,year
-calc_income_tax,LMITO_max,1080,year
-calc_income_tax,LMITO_dec_rate,0.03,year
-calc_income_tax,BRL_on,1,year
-calc_income_tax,BRL_threshold,180000,year
-calc_income_tax,BRL_rate,0.02,year
-calc_income_tax,BTO_threshold,6000,year
-calc_income_tax,BTO_rate,0.15,year
-calc_rent_assistance,rent_max_single_la,,fortnight
-calc_rent_assistance,rent_min_single_la,,fortnight
-calc_rent_assistance,rent_max_single_share,,fortnight
-calc_rent_assistance,rent_min_single_share,,fortnight
-calc_rent_assistance,rent_max_couple,,fortnight
-calc_rent_assistance,rent_min_couple,,fortnight
-calc_rent_assistance,rent_max_single_dep1,,fortnight
-calc_rent_assistance,rent_min_single_dep1,,fortnight
-calc_rent_assistance,rent_max_couple_dep1,,fortnight
-calc_rent_assistance,rent_min_couple_dep1,,fortnight
-calc_rent_assistance,rent_max_single_dep3,,fortnight
-calc_rent_assistance,rent_min_single_dep3,,fortnight
-calc_rent_assistance,rent_max_couple_dep3,,fortnight
-calc_rent_assistance,rent_min_couple_dep3,,fortnight
-calc_rent_assistance,ra_rate,,fortnight
-calc_energy_supp,energy_partnered,,fortnight
-calc_energy_supp,energy_single,,fortnight
-calc_energy_supp,energy_over60,,fortnight
-calc_energy_supp,energy_single_dep,,fortnight
-calc_main_benefit,JSP_S_ND_pay,,fortnight
-calc_main_benefit,JSP_S_D_pay,,fortnight
-calc_main_benefit,JSP_C_ND_pay,,fortnight
-calc_main_benefit,JSP_C_D_pay,,fortnight
-calc_main_benefit,JSP_S_ND_arate_1,,fortnight
-calc_main_benefit,JSP_S_ND_arate_2,,fortnight
-calc_main_benefit,JSP_S_ND_athresh_1,,fortnight
-calc_main_benefit,JSP_S_ND_athresh_2,,fortnight
-calc_main_benefit,PP_S_pay,,fortnight
-calc_main_benefit,PP_C_pay,,fortnight
-calc_main_benefit,PP_S_athresh_base,,fortnight
-calc_main_benefit,PP_S_athresh_mult,,fortnight
-calc_main_benefit,PP_S_arate,,fortnight
-calc_family_benefit,fam_base_threshold,,year
-calc_family_benefit,fam_max_threshold,,year
-calc_family_benefit,fam_basic_pay,,fortnight
-calc_family_benefit,fam_base_rate,,year
-calc_family_benefit,firm_max_rate,,year
-calc_family_benefit,fam_a_highATI_rate,,year
-calc_family_benefit,fam_b_threshold,,year
-calc_family_benefit,fam_be_low_thresh,,year
-calc_family_benefit,super_cont_rate,,year
-calc_family_benefit,fam_a_young_pay,,fortnight
-calc_family_benefit,fam_a_old_pay,,fortnight
-calc_family_benefit,fam_b_young_pay,,fortnight
-calc_family_benefit,fam_b_old_pay,,fortnight
+function,Parameter,Value,period,Desc
+calc_income_tax,tax_free,18200,year,Tax-free threshold
+calc_income_tax,tax_threshold_1,45000,year,First-tax threshold
+calc_income_tax,tax_threshold_2,120000,year,Second-tax threshold
+calc_income_tax,tax_threshold_3,180000,year,Third-tax threshold
+calc_income_tax,tax_rate_1,0.19,year,First-tax rate
+calc_income_tax,tax_rate_2,0.325,year,Second-tax rate
+calc_income_tax,tax_rate_3,0.37,year,Third-tax rate
+calc_income_tax,tax_rate_4,0.45,year,Top-tax rate
+calc_income_tax,LITO_on,1,year,Low Income Tax Offset On
+calc_income_tax,LITO_thresh_1,37500,year,First-Low Income Tax Offset threshold
+calc_income_tax,LITO_thresh_2,45000,year,Second-Low Income Tax Offset threshold
+calc_income_tax,LITO_gross,700,year,Maximum Low Income Tax Offset refund
+calc_income_tax,LITO_rate_1,0.005,year,First abatement rate Low Income Tax Offset
+calc_income_tax,LITO_rate_2,0.015,year,Second abatement rate Low Income Tax Offset
+calc_income_tax,LMITO_on,0,year,Low and Middle Income Tax Offset On
+calc_income_tax,LMITO_thresh_1,37000,year,First-LMITO threshold
+calc_income_tax,LMITO_thresh_2,48000,year,Second-LMITO threshold
+calc_income_tax,LMITO_thresh_3,90000,year,Third-LMITO threshold
+calc_income_tax,LMITO_gross,255,year,Base LMITO until first threshold
+calc_income_tax,LMITO_inc_rate,0.075,year,Credit LMITO rate between first and second threshold
+calc_income_tax,LMITO_max,1080,year,Maximum LMITO refund
+calc_income_tax,LMITO_dec_rate,0.03,year,Abatement rate LMITO after third threshold
+calc_income_tax,BRL_on,0,year,Budget Repair Levy On
+calc_income_tax,BRL_thresh,180000,year,Budget Repair Levy threshold
+calc_income_tax,BRL_rate,0.02,year,Budget Repair Levy rate
+calc_income_tax,BTO_thresh,6000,year,Beneficiary tax offset threshold
+calc_income_tax,BTO_rate,0.15,year,Beneficiary tax offset rate
+calc_rent_assistance,rent_max_single_la,350,fortnight,Rent ceiling single no dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_la,140.4,fortnight,Rent threshold single no dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_single_share,280.14,fortnight,Rent ceiling single shared no dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_share,140.4,fortnight,Rent threshold single shared no dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_couple,424.74,fortnight,Rent ceiling couple no dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_couple,227.4,fortnight,Rent threshold couple no dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_single_dep1,430.97,fortnight,Rent ceiling single 1-2 dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_dep1,184.38,fortnight,Rent threshold single 1-2 dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_couple_dep1,519.03,fortnight,Rent ceiling couple 1-2 dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_couple_dep1,272.44,fortnight,Rent threshold couple 1-2 dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_single_dep3,462.7,fortnight,Rent ceiling single 3+ dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_single_dep3,184.38,fortnight,Rent threshold single 3+ dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_max_couple_dep3,550.76,fortnight,Rent ceiling couple 3+ dependents (lowest rent that provides the max rental assistance payment)
+calc_rent_assistance,rent_min_couple_dep3,272.44,fortnight,Rent threshold couple 3+ dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,ra_rate,0.75,fortnight,Rental Assistance given per dollar of rent between the threshold and ceiling.
+calc_energy_supp,energy_partnered,7.9,fortnight,JSP Energy Supplement for coupled individual
+calc_energy_supp,energy_single,8.8,fortnight,JSP Energy Supplement for single no dependent individual
+calc_energy_supp,energy_over60,9.5,fortnight,JSP Energy Supplement for over 60 individual
+calc_energy_supp,energy_single_dep,9.5,fortnight,JSP Energy Supplement for single with dependent(s) individual
+calc_main_benefit,JSP_S_ND_pay,693.1,fortnight,JSP Basic Rate Single no dependent
+calc_main_benefit,JSP_S_D_pay,745.2,fortnight,JSP Basic Rate Single with dependent(s)
+calc_main_benefit,JSP_S_Age_pay,745.2,fortnight,JSP over 60 Rate Single
+calc_main_benefit,JSP_C_ND_pay,631.2,fortnight,JSP Basic Rate Coupled no dependent
+calc_main_benefit,JSP_C_D_pay,631.2,fortnight,JSP Basic Rate Coupled with dependent(s)
+calc_main_benefit,JSP_S_ND_arate_1,0.5,fortnight,JSP First abatement rate Single no dependent
+calc_main_benefit,JSP_S_ND_arate_2,0.6,fortnight,JSP Second abatement rate Single no dependent
+calc_main_benefit,JSP_S_ND_athresh_1,150,fortnight,JSP First abatement threshold Single no dependent
+calc_main_benefit,JSP_S_ND_athresh_2,256,fortnight,JSP Second abatement threshold Single no dependent
+calc_main_benefit,PP_S_pay,922.1,fortnight,Parenting Payment Single amount
+calc_main_benefit,PP_C_pay,631.2,fortnight,Parenting Payment Couple amount
+calc_main_benefit,PP_S_athresh_base,214.6,fortnight,"PPS abatement threshold, one child"
+calc_main_benefit,PP_S_athresh_2,239.2,fortnight,"PPS abatement threshold, two children"
+calc_main_benefit,PP_S_athresh_3,263.8,year,"PPS abatement threshold, three children"
+calc_main_benefit,PP_S_athresh_mult,24.6,year,"PPS increase in abatement, per extra child"
+calc_main_benefit,PP_C_P_Threshold,1233,fortnight,PPC Partner Income Threshold
+calc_main_benefit,PP_C_I_Threshold_1,150,year,PPC Individual Income Threshold 1 
+calc_main_benefit,PP_C_I_Threshold_2,256,year,PPC Individual Income Threshold 2
+calc_main_benefit,PP_S_arate,0.4,year,PPS abatement rate
+calc_main_benefit,PP_C_arate_1,0.5,year,PPC abatement rate 1
+calc_main_benefit,PP_C_arate_2,0.6,year,PPC abatement rate 2
+calc_family_benefit,fam_base_threshold,111398,year,Base abatement threshold FTB-A
+calc_family_benefit,fam_max_threshold,62624,fortnight,Maximum rate first abatement threshold FTB-A
+calc_family_benefit,fam_basic_pay,68.46,fortnight,Base rate payment Family Tax Benefit Part A
+calc_family_benefit,fam_base_rate,0.1,fortnight,Additional income abatement after crossing the base rate
+calc_family_benefit,fam_max_rate,0.2,fortnight,Abatement after crossing the max rate
+calc_family_benefit,fam_a_highATI_rate,0.3,fortnight,Alternative abatement when past base rate
+calc_family_benefit,fam_b_threshold,112578,year,Income threshold for FTB B 
+calc_family_benefit,fam_be_low_thresh,6497,year,Income threshold for the lower income earner
+calc_family_benefit,super_cont_rate,0.11,,Mandatory rate of superannuation in Australia for the financial year
+calc_family_benefit,fam_a_young_pay,213.46,fortnight,Payment per young child
+calc_family_benefit,fam_a_old_pay,277.48,fortnight,Payment per old child
+calc_family_benefit,fam_b_young_pay,181.44,fortnight,Payment for children under 5 
+calc_family_benefit,fam_b_old_pay,126.56,fortnight,Payment for children between 5 to 18 
+calc_benefit_abated,partner_thresh,1196,,"Partner threshold, no children"
+calc_benefit_abated,partner_thresh_dep,1201,,"Partner threshold, children"
+calc_benefit_abated,partner_abate,0.6,,Rate reduced by partner threshold
+calc_HECS,HECS_Threshold_1,51550,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_2,59518,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_3,63089,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_4,66875,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_5,70888,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_6,75140,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_7,79649,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_8,84429,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_9,89424,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_10,94865,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_11,100557,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_12,106590,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_13,112985,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_14,119764,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_15,126950,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_16,134568,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_17,142642,year,HECS Threshold/Rate
+calc_HECS,HECS_Threshold_18,151200,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate1,0.01,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate2,0.02,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate3,0.025,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate4,0.03,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate5,0.035,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate6,0.04,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate7,0.045,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate8,0.05,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate9,0.055,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate10,0.06,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate11,0.065,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate12,0.07,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate13,0.075,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate14,0.08,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate15,0.085,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate16,0.09,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate17,0.095,year,HECS Threshold/Rate
+calc_HECS,HECS_Rate18,0.1,year,HECS Threshold/Rate
+calc_HECS,num_thresholds,18,na ,Number of HECS Thresholds
+calc_income_tax,medi_LI_threshold_S,24276,year,Medicare Levy Surchage
+calc_income_tax,medi_PI_threshold_S,30345,year,Medicare Levy Surchage
+calc_income_tax,medi_LI_threshold_P,40939,year,Medicare Levy Surchage
+calc_income_tax,medi_PI_threshold_P,51174,year,Medicare Levy Surchage
+calc_income_tax,medi_dep_LI_threshold,3760,year,Medicare Levy Surchage
+calc_income_tax,medi_dep_PI_threshold,4700,year,Medicare Levy Surchage
+calc_benefit_abated,work_for_the_dole,20.8,fortnight,Additional income for JSP recpients 
+calc_family_benefit,fam_ftba_eoy_supp,879.65,year,End of year FTB A supplement per child 
+calc_family_benefit,fam_ftba_eoy_incthreshold,80000,year ,End of year FTB A income threshold 
+calc_family_benefit,fam_ftbb_eoy_supp,430.7,year,End of year FTB B supplement per family 

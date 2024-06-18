@@ -10,10 +10,10 @@ calc_income_tax,tax_rate_4,0.45,year,Top-tax rate
 calc_income_tax,LITO_on,1,year,Low Income Tax Offset On
 calc_income_tax,LITO_thresh_1,37500,year,First-Low Income Tax Offset threshold
 calc_income_tax,LITO_thresh_2,45000,year,Second-Low Income Tax Offset threshold
-calc_income_tax,LITO_gross,700,year,Maximum Low Income Tax Offset refund
-calc_income_tax,LITO_rate_1,0.05,year,First abatement rate Low Income Tax Offset
+calc_income_tax,LITO_gross,445,year,Maximum Low Income Tax Offset refund
+calc_income_tax,LITO_rate_1,0.015,year,First abatement rate Low Income Tax Offset
 calc_income_tax,LITO_rate_2,0.015,year,Second abatement rate Low Income Tax Offset
-calc_income_tax,LMITO_on,0,year,Low and Middle Income Tax Offset On
+calc_income_tax,LMITO_on,1,year,Low and Middle Income Tax Offset On
 calc_income_tax,LMITO_thresh_1,37000,year,First-LMITO threshold
 calc_income_tax,LMITO_thresh_2,48000,year,Second-LMITO threshold
 calc_income_tax,LMITO_thresh_3,90000,year,Third-LMITO threshold
@@ -29,7 +29,7 @@ calc_income_tax,BTO_rate,0.15,year,Beneficiary tax offset rate
 calc_rent_assistance,rent_max_single_la,305.33,fortnight,Rent ceiling single no dependents (lowest rent that provides the max rental assistance payment)
 calc_rent_assistance,rent_min_single_la,122.4,fortnight,Rent threshold single no dependents (min rent to be eligible for rent assistance)
 calc_rent_assistance,rent_max_single_share,244.36,fortnight,Rent ceiling single shared no dependents (lowest rent that provides the max rental assistance payment)
-calc_rent_assistance,rent_min_single_share,91.47,fortnight,Rent threshold single shared no dependents (min rent to be eligible for rent assistance)
+calc_rent_assistance,rent_min_single_share,122.4,fortnight,Rent threshold single shared no dependents (min rent to be eligible for rent assistance)
 calc_rent_assistance,rent_max_couple,370.47,fortnight,Rent ceiling couple no dependents (lowest rent that provides the max rental assistance payment)
 calc_rent_assistance,rent_min_couple,198.2,fortnight,Rent threshold couple no dependents (min rent to be eligible for rent assistance)
 calc_rent_assistance,rent_max_single_dep1,375.43,fortnight,Rent ceiling single 1-2 dependents (lowest rent that provides the max rental assistance payment)
@@ -74,13 +74,13 @@ calc_family_benefit,fam_max_rate,0.2,year,Abatement after crossing the max rate
 calc_family_benefit,fam_a_highATI_rate,0.3,year,Alternative abatement when past base rate
 calc_family_benefit,fam_b_threshold,100000,year,X
 calc_family_benefit,fam_be_low_thresh,5694,year,X
-calc_family_benefit,super_cont_rate,0.15,year,X
+calc_family_benefit,super_cont_rate,0.095,year,X
 calc_family_benefit,fam_a_young_pay,186.2,fortnight,X
 calc_family_benefit,fam_a_old_pay,242.2,fortnight,X
 calc_family_benefit,fam_b_young_pay,158.34,fortnight,X
 calc_family_benefit,fam_b_old_pay,110.6,fortnight,X
-calc_benefit_abated,partner_thresh,1196,fortnight,X
-calc_benefit_abated,partner_thresh_dep,1201,fortnight,X
+calc_benefit_abated,partner_thresh,979,fortnight,X
+calc_benefit_abated,partner_thresh_dep,979,fortnight,X
 calc_benefit_abated,partner_abate,0.6,fortnight,X
 calc_HECS,HECS_Threshold_1,45880,year,
 calc_HECS,HECS_Threshold_2,52973,year,
@@ -118,9 +118,14 @@ calc_HECS,HECS_Rate15,0.085,year,
 calc_HECS,HECS_Rate16,0.09,year,
 calc_HECS,HECS_Rate17,0.095,year,
 calc_HECS,HECS_Rate18,0.1,year,
-calc_income_tax,medi_LI_threshold_S,23365,year,
-calc_income_tax,medi_PI_threshold_S,29206,year,
-calc_income_tax,medi_LI_threshold_P,39402,year,
-calc_income_tax,medi_PI_threshold_P,49252,year,
-calc_income_tax,medi_dep_LI_threshold,3619,year,
-calc_income_tax,medi_dep_PI_threshold,4523,year,
+calc_HECS,num_thresholds,18,na ,Number of HECS Thresholds
+calc_income_tax,medi_LI_threshold_S,22801,year,
+calc_income_tax,medi_PI_threshold_S,28501,year,
+calc_income_tax,medi_LI_threshold_P,38474,year,
+calc_income_tax,medi_PI_threshold_P,48092,year,
+calc_income_tax,medi_dep_LI_threshold,3533,year,
+calc_income_tax,medi_dep_PI_threshold,4416,year,
+calc_main_benefit,work_for_the_dole,20.8,fortnight,
+calc_family_benefit,fam_ftba_eoy_supp,766.5,year,End of year FTB A supplement per child 
+calc_family_benefit,fam_ftba_eoy_incthreshold,80000,year ,End of year FTB A income threshold 
+calc_family_benefit,fam_ftbb_eoy_supp,372.3,year,End of year FTB B supplement per family 

@@ -74,7 +74,7 @@ calc_family_benefit,fam_max_rate,0.2,year,Abatement after crossing the max rate
 calc_family_benefit,fam_a_highATI_rate,0.3,year,Alternative abatement when past base rate
 calc_family_benefit,fam_b_threshold,100000,year,X
 calc_family_benefit,fam_be_low_thresh,5694,year,X
-calc_family_benefit,super_cont_rate,0.15,year,X
+calc_family_benefit,super_cont_rate,0.095,year,X
 calc_family_benefit,fam_a_young_pay,186.2,fortnight,X
 calc_family_benefit,fam_a_old_pay,242.2,fortnight,X
 calc_family_benefit,fam_b_young_pay,158.34,fortnight,X
@@ -118,9 +118,14 @@ calc_HECS,HECS_Rate15,0.085,year,
 calc_HECS,HECS_Rate16,0.09,year,
 calc_HECS,HECS_Rate17,0.095,year,
 calc_HECS,HECS_Rate18,0.1,year,
+calc_HECS,num_thresholds,18,na ,Number of HECS Thresholds
 calc_income_tax,medi_LI_threshold_S,23365,year,
 calc_income_tax,medi_PI_threshold_S,29206,year,
 calc_income_tax,medi_LI_threshold_P,39402,year,
 calc_income_tax,medi_PI_threshold_P,49252,year,
 calc_income_tax,medi_dep_LI_threshold,3619,year,
 calc_income_tax,medi_dep_PI_threshold,4523,year,
+calc_main_benefit,work_for_the_dole,20.8,fortnight,
+calc_family_benefit,fam_ftba_eoy_supp,766.5,year,End of year FTB A supplement per child 
+calc_family_benefit,fam_ftba_eoy_incthreshold,80000,year ,End of year FTB A income threshold 
+calc_family_benefit,fam_ftbb_eoy_supp,372.3,year,End of year FTB B supplement per family 

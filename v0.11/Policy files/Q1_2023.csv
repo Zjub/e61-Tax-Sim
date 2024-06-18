@@ -74,7 +74,7 @@ calc_family_benefit,fam_max_rate,0.2,year,Abatement after crossing the max rate
 calc_family_benefit,fam_a_highATI_rate,0.3,year,Alternative abatement when past base rate
 calc_family_benefit,fam_b_threshold,104432,year,X
 calc_family_benefit,fam_be_low_thresh,6059,year,X
-calc_family_benefit,super_cont_rate,0.15,year,X
+calc_family_benefit,super_cont_rate,0.105,year,X
 calc_family_benefit,fam_a_young_pay,197.96,fortnight,X
 calc_family_benefit,fam_a_old_pay,257.46,fortnight,X
 calc_family_benefit,fam_b_young_pay,168.28,fortnight,X
