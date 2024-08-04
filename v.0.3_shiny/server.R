@@ -92,12 +92,17 @@ function(input, output, session) {
       HTML("<b>How do I interpret these charts?</b>")
     })
     output$interpretation_text <- renderText({
-            paste("The above charts show the impact of labour market participation on an individual's earnings.",
+            paste("The above charts show the how the individual's earnings change in response to changes
+                  in labour market engagement.",
             "The left hand chart is an earnings schedule, which has", basis_text,
             "on the x axis, and components of income and taxes on the Y axis.",
-            "You can hover your mouse over different colours within the chart to see",
-            "what income component it relates to and how it changes in response to more labour market engagement.
-            The right-hand chart shows the workers Effective Marginal Tax Rates (EMTR).")
+            "You can hover your mouse over different colours on the chart to see",
+            "what component of our tax and transfer system it relates to, and how these values change as 
+            the individual works more or less. 
+            The right-hand chart shows how the worker's
+            Effective Marginal Tax Rate (EMTR) changes
+            in response to changes in their labour 
+            market engagement.")
     })
   
     output$Title_2 <- renderUI({
@@ -106,18 +111,22 @@ function(input, output, session) {
     output$interpretation_text_2 <- renderText({
       paste("A worker's Effective Marginal Tax Rate (EMTR) is the percentage of
       each additional dollar earned that is taken away through taxes and reduced benefits.", 
-            "In this context, it reflects, for an additional",
+            "In the above chart it reflects the proportion of income withdrawn for each additional",
       basis_text2,
-        "what proportion of income earned will be withdrawn. You can hover
-      over the different elements on the right-hand chart to see whether income withdrawn
-      is due to tax paid or benefits lost. A high EMTR discourage further labor market engagement
-      by reducing the financial incentive to earn additional income. An EMTR above 1 implies that
-      the worker loses more than 100% of their income earned through marginal labour market
-      engagement. It is important to note that, in reality, workers do not have the capacity to perfectly target
-      their labour market engagement (for instance choosing the exact amount of 
-      labour market income to earn or hours to work per week). This may mean 
-      that rather than working an additional hour, a worker may choose to 
-      engage in the labour market for another shift per week, or work another day."   )
+        ". You can hover over the different elements on the right-hand chart to see whether the income
+      withdrawn is due to taxes paid or benefits lost.
+      A high EMTR discourages further labour market engagement by reducing
+      the financial incentive to earn additional income.
+      An extreme case for this is an EMTR above 100%, which
+      implies that the worker loses more than their
+      additional income earned through marginal labor market engagement.
+      It is important to note that, in reality,
+      workers cannot perfectly target their labor market engagement
+      (for instance, choosing the exact amount of labor market
+      income to earn or hours to work per week).
+      This may mean that instead of working an additional hour,
+      a worker may choose to engage in the labor market for another shift per week or
+      work another day."   )
     }) 
     
     output$Title_3 <- renderUI({
@@ -268,6 +277,22 @@ function(input, output, session) {
  #   
     
   }
+  
+  
+  if(input$UBI_mode == TRUE){
+  
+    #    
+     JSP_S_ND_athresh_1 <<- Inf
+     JSP_S_ND_athresh_2 <<- Inf
+     PP_C_I_Threshold_1 <<- Inf
+     PP_C_I_Threshold_2 <<- Inf
+     PP_C_P_Threshold <<- Inf 
+     PP_S_athresh_2 <<- Inf
+     PP_S_athresh_3 <<- Inf
+     PP_S_athresh_base <<- Inf
+     PP_S_athresh_mult <<- Inf
+  }
+  
   
   
   

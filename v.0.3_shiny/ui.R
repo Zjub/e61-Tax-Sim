@@ -80,7 +80,7 @@ fluidPage(
                  checkboxInput("turn_off_BTO", "Turn off the Beneficiary tax offset"),
                  uiOutput("tax_brackets_inputs")
                ), 
-               checkboxInput("edit_job_seeker", "Edit Job Seeker and Parenting Payment"),
+               checkboxInput("edit_job_seeker", "Edit Job Seeker and Parenting Payment (All values are weekly)"),
                conditionalPanel(
                  condition = "input.edit_job_seeker == true",
                  numericInput("job_seeker_single", "Job Seeker - Single Amount:", value =  693.1 , min = 0),
@@ -90,7 +90,9 @@ fluidPage(
               #   numericInput("PP_add", "Parenting Payment - Abatement Threshold Increase Per Child for Singles:", value = 24.6, min = 0),
                #  numericInput("num_abatement_thresholds", "Number of Abatement Thresholds:", value = 2, min = 0, max = 2),
                #  uiOutput("abatement_inputs")
-               )        
+               ),   
+              checkboxInput("UBI_mode", "Introduce a UBI (Everyone recieves Jobseeker or the Parenting Payment
+                            at their maximum rate)"),
       )
       ),
       
@@ -117,5 +119,37 @@ fluidPage(
           p("By Matthew Maltman and Matt Nolan, last updated ", Sys.Date(), ". Currently using Q3 2024 Policy Parameters")# Add a text output for debugging
       )
     )
-  )
+  ),
+  tags$script(HTML("
+        $(document).ready(function() {
+            var enforceLimits = function(id) {
+                var input = $('#' + id);
+                input.on('input', function() {
+                    var min = input.attr('min');
+                    var max = input.attr('max');
+                    var value = input.val();
+                    if (min && parseInt(value) < parseInt(min)) {
+                        input.val(min);
+                    }
+                    if (max && parseInt(value) > parseInt(max)) {
+                        input.val(max);
+                    }
+                });
+            };
+            
+            enforceLimits('max_hours');
+            enforceLimits('wages');
+            enforceLimits('num_dependents');
+            enforceLimits('weekly_rent');
+            enforceLimits('partner_income');
+            enforceLimits('total_hecs_debt');
+            enforceLimits('max_income');
+            enforceLimits('num_tax_brackets');
+            enforceLimits('job_seeker_single');
+            enforceLimits('job_seeker_couple');
+            enforceLimits('PP_single');
+            enforceLimits('PP_couple');
+        });
+    "))
 )
+
