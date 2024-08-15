@@ -5,17 +5,24 @@
 
 ## Function ----
 calc_family_benefit <- function(child_age,gross_fam_income,work_income,taxable_benefit){
-  # Note, the LITSO is not counted in the super information.
+  
+  ##### Setup variables for eligibility and thresholds. 
+  
   super_contributions = super_cont_rate*(work_income + partner_earnings)
   ATI = gross_fam_income #+ super_contributions
   net_fam_a = 0
   net_fam_b = 0
-  net_fam = 0
   numb_child_12 <- length(child_age[child_age < 13])
   numb_child_19 <- length(child_age[child_age <20 & child_age > 12])
-  fam_a <- fam_a_young_pay*numb_child_12 + fam_a_old_pay*numb_child_19
+  
   RA <- calc_benefit_gross()[["RA"]] 
   ES <- calc_benefit_gross()[["ES"]] 
+  
+  
+  ##### Initial Rate of Fam_a if there is no abatement 
+  
+  fam_a <- fam_a_young_pay*numb_child_12 + fam_a_old_pay*numb_child_19
+
   
   First_abatement <- max(min(ATI - fam_max_threshold, fam_base_threshold - fam_max_threshold), 0) 
   Second_abatement <- max(ATI - fam_base_threshold, 0)

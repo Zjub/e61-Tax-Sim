@@ -1,11 +1,3 @@
-## Calculating of the gross benefit payment ----
-# Last update: 25/08/2023
-# Updated by: Matt Nolan
-# Initial author: Matt Nolan
-
-# Function for calculating income tax ----
-# Includes Low Income Tax Credit, Low and Middle Income Tax Credit, Temporary Budget Repair Levy, and Beneficiary Tax offset.
-
 calc_HECS <- function(gross_income) {
  
   

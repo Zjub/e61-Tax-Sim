@@ -6,10 +6,9 @@
 # Function calculating main benefit ----
 
 calc_main_benefit <- function(Numb_dep,partnered,Main_carer_dep) {
-  PPeligible <- ifelse((young_child <= 6 | (young_child <= 8 & partnered == 0)) & Main_carer_dep == 1,1,0)
   
   
-  # Benefit elements [currently only JSP]
+ 
   JSP_S_ND_arate <- c(0,JSP_S_ND_arate_1,JSP_S_ND_arate_2)
   JSP_S_ND_athresh <- c(0,JSP_S_ND_athresh_1,JSP_S_ND_athresh_2)
   
@@ -35,7 +34,9 @@ calc_main_benefit <- function(Numb_dep,partnered,Main_carer_dep) {
     PP_pay <- ifelse(partnered == 1,PP_C_pay,PP_S_pay)
   }
   else {
-    JSP_pay <- ifelse(Numb_dep == 0 & partnered == 0,JSP_S_ND_pay,ifelse(Numb_dep > 0 & partnered == 0, JSP_S_D_pay,ifelse(Numb_dep == 0,JSP_C_ND_pay,JSP_C_D_pay)))
+    JSP_pay <- ifelse(Numb_dep == 0 & partnered == 0,JSP_S_ND_pay,
+                      ifelse(Numb_dep > 0 & partnered == 0, 
+                             JSP_S_D_pay,ifelse(Numb_dep == 0,JSP_C_ND_pay,JSP_C_D_pay)))
   }
   return(list(PP_pay = PP_pay,JSP_pay = JSP_pay))
 }

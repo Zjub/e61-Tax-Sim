@@ -6,16 +6,19 @@
 
 ## Function ----
 calc_benefit_gross <- function(){
-  gross_benefit = calc_main_benefit(Numb_dep,partnered,Main_carer_dep)[["JSP_pay"]] + calc_main_benefit(Numb_dep,partnered,Main_carer_dep)[["PP_pay"]] + calc_rent_assistance(Rent,partnered,Numb_dep,living_alone,ben_eligibility, Home_owner) + calc_energy_supp(ben_eligibility, partnered,Have_dep,over_60)
-  taxable_benefit = calc_main_benefit(Numb_dep,partnered,Main_carer_dep)[["JSP_pay"]] + calc_main_benefit(Numb_dep,partnered,Main_carer_dep)[["PP_pay"]]
-  supp_benefit = gross_benefit - taxable_benefit
-  
-  
+
   JSP_Pay <- calc_main_benefit(Numb_dep,partnered,Main_carer_dep)[["JSP_pay"]]
   PP_Pay <- calc_main_benefit(Numb_dep,partnered,Main_carer_dep)[["PP_pay"]]
   RA <- calc_rent_assistance(Rent,partnered,Numb_dep,living_alone,ben_eligibility, Home_owner)
   ES <- calc_energy_supp(ben_eligibility, partnered,Have_dep,over_60)
+  gross_benefit = JSP_Pay + PP_Pay + RA + ES 
+  taxable_benefit = JSP_Pay + PP_Pay 
+  supp_benefit = RA + ES 
   
-  return(list(gross_benefit = gross_benefit,taxable_benefit = taxable_benefit,supp_benefit = supp_benefit, JSP_Pay = JSP_Pay,
-              PP_Pay = PP_Pay, RA = RA, ES = ES ))
+  return(list(gross_benefit = gross_benefit,
+              taxable_benefit = taxable_benefit,
+              supp_benefit = supp_benefit,
+              JSP_Pay = JSP_Pay,
+              PP_Pay = PP_Pay,
+              RA = RA, ES = ES ))
 }

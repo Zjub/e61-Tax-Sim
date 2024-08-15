@@ -12,7 +12,6 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
   supp_benefit = calc_benefit_gross()[["supp_benefit"]]
   work_income <- work_income
   abate = 0
-  #abate <- ifelse(Have_dep == 1, max((partner_earnings/26 - partner_thresh_dep)*partner_abate,0),max((partner_earnings/26 - partner_thresh)*partner_abate,0))
   tempwi <- work_income / 26 # Fortnightly pay
   
   JSPabate = abate 
@@ -140,8 +139,7 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
   
   RA <- RA - (RA * Abatement_rate)
   ES <- ES - (ES * Abatement_rate)
-  }
-  else{
+  }   else{
     Abatement_rate <- ifelse(JSP + PP_Pay > 0, (abate) / (JSP + PP_Pay), 0)
     
     ## Can't abate more than 100% of your benefit. 
@@ -152,6 +150,8 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
     
     JSP <-   JSP - (JSP * Abatement_rate)
     PP_Pay <-  PP_Pay - (PP_Pay * Abatement_rate)
+    RA <- ifelse(JSP + PP_Pay == 0, 0, RA)
+    ES <- ifelse(JSP + PP_Pay == 0 , 0, ES )
     
     
   }
