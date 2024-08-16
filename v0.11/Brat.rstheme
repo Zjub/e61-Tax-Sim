@@ -1,1 +1,9 @@
+/* rs-theme-name: Synthwave85 */
+/* rs-theme-is-dark: TRUE */
+/* Created by Jacqueline Nolis: https://github.com/jnolis/synthwave85 */
+/* Version: v1.0.1 */
 
+editor-background: #8ACE00;
+editor-foreground: #FFFFFF;  /* White text color */
+editor-cursor: #FF0000;      /* Red cursor */
+editor-selection: #BADA55;   /* Custom selection color */
