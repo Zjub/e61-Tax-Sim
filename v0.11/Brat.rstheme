@@ -1,9 +1,32 @@
-/* rs-theme-name: Synthwave85 */
-/* rs-theme-is-dark: TRUE */
-/* Created by Jacqueline Nolis: https://github.com/jnolis/synthwave85 */
-/* Version: v1.0.1 */
+// Custom RStudio Theme: Green Background with Black Arial Text
 
+// Theme metadata
+theme-name: Brat
+theme-id: custom-green-theme
+theme-author: Your Name
+theme-version: 1.0
+
+// Editor colors
 editor-background: #8ACE00;
-editor-foreground: #FFFFFF;  /* White text color */
-editor-cursor: #FF0000;      /* Red cursor */
-editor-selection: #BADA55;   /* Custom selection color */
+editor-foreground: #000000;
+editor-cursor: #000000;
+editor-selection: #CCCCCC;      // Light grey for selected text background
+
+// Font
+editor-font-family: Arial, sans-serif;
+editor-font-size: 12;           // You can adjust the font size as needed
+
+// Console colors
+console-background: #8ACE00;
+console-foreground: #000000;
+console-cursor: #000000;
+console-selection: #CCCCCC;
+
+// Toolbar and panes
+pane-background: #8ACE00;
+pane-foreground: #000000;
+toolbar-background: #8ACE00;
+toolbar-foreground: #000000;
+
+// Miscellaneous
+accent-color: #000000;          // Accent color for highlights or other elements
