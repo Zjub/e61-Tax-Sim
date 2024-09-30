@@ -22,10 +22,18 @@ calc_family_benefit <- function(child_age,gross_fam_income,work_income,taxable_b
   ##### Initial Rate of Fam_a if there is no abatement 
   
   fam_a <- fam_a_young_pay*numb_child_12 + fam_a_old_pay*numb_child_19
-
   
-  First_abatement <- max(min(ATI - fam_max_threshold, fam_base_threshold - fam_max_threshold), 0) 
-  Second_abatement <- max(ATI - fam_base_threshold, 0)
+  # This is attributing the end of year supplement to each fortnight, as it is defacto means tested against income. Note that the treatment of this payment gets more complicated when income is volatile
+  fam_a_ann_supp <- ifelse(ATI < fam_ftba_eoy_incthreshold, fam_ftba_eoy_supp * Numb_dep, 0) / 26
+  fam_a <- ifelse(fam_a > 0, fam_a + fam_a_ann_supp, 0)
+
+  if (taxable_benefit > 0) {
+    First_abatement <- 0
+    Second_abatement <- 0
+  }else{
+    First_abatement <- max(min(ATI - fam_max_threshold, fam_base_threshold - fam_max_threshold), 0) 
+    Second_abatement <- max(ATI - fam_base_threshold, 0)
+  }
   
   if(RA_Abate == 1){
   
@@ -100,10 +108,10 @@ calc_family_benefit <- function(child_age,gross_fam_income,work_income,taxable_b
   
   # Add Family Benefit B
   FTB_B_eligibility <- 0
-  if(length(child_age[child_age < 13]) > 1){
+  if(length(child_age[child_age < 13]) > 0){
     FTB_B_eligibility <- 1 
   }
-  if(length(child_age[child_age < 19]) > 1 & partnered == 0){
+  if(length(child_age[child_age < 19]) > 0 & partnered == 0){
     FTB_B_eligibility <- 1 
   }
   
@@ -128,9 +136,6 @@ calc_family_benefit <- function(child_age,gross_fam_income,work_income,taxable_b
     net_fam_b = ifelse(highest_hh_income  > fam_b_threshold, 0 , max(fam_b - fam_b_abatement, 0))
   }
   net_fam_b <- net_fam_b * FTB_B_eligibility
-  
-  fam_a_ann_supp <- ifelse(ATI < fam_ftba_eoy_incthreshold, fam_ftba_eoy_supp * Numb_dep, 0) / 26
-  net_fam_a <- ifelse(net_fam_a > 0, net_fam_a + fam_a_ann_supp, 0)
   
   net_fam_b <- ifelse(net_fam_b > 0, (fam_ftbb_eoy_supp / 26) + net_fam_b, 0)
   
