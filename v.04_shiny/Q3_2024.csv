@@ -131,3 +131,6 @@ calc_family_benefit,fam_ftba_eoy_incthreshold,80000,year ,End of year FTB A inco
 calc_family_benefit,fam_ftbb_eoy_supp,448.95,year,End of year FTB B supplement per family 
 calc_benefit_gross ,PA_single,6.2,fortnight,Pharmacutical Allowance for a single person
 calc_benefit_gross ,PA_partnered,3.1,fortnight,Pharmacutical Allowance for a partnered person
+calc_income_tax,SAPTO_Single_Max,2230,year,Maximum tax offset for SAPTO Singles
+calc_income_tax,SAPTO_Single_Shade_Out,32279,year,First abatement threshold for SAPTO Singles
+calc_income_tax,SAPTO_Rate,0.125,na,Rate of abatement for SAPTO

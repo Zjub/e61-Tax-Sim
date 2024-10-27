@@ -39,7 +39,27 @@ calc_income_tax <- function(gross_income,work_income) {
 
   LITO_credit <- 0
   if (LITO_on == 1){
-    LITO_credit <- max(0,LITO_gross - max(0,(gross_income - LITO_thresh_1)*LITO_rate_1) - max(0,(gross_income - LITO_thresh_2)*LITO_rate_2))
+    calculate_LITO <- function(gross_income) {
+      if (gross_income <= LITO_thresh_1) {
+        # If income is below or equal to the first threshold
+        LITO_credit <- LITO_gross
+      } else if (gross_income > LITO_thresh_1 & gross_income <= LITO_thresh_2) {
+        # If income is between the first and second thresholds
+        excess_income <- gross_income - LITO_thresh_1
+        LITO_credit <- LITO_gross - (excess_income * LITO_rate_1)
+      } else if (gross_income > LITO_thresh_2) {
+        # If income is between the second threshold and 66,667
+        excess_income <- gross_income - LITO_thresh_2
+        LITO_credit <- LITO_gross - (LITO_thresh_2 - LITO_thresh_1) * LITO_rate_1 - (excess_income * LITO_rate_2)
+      } else {
+        # If income exceeds 66,667
+        LITO_credit <- 0
+      }
+      LITO_credit <- max(0, LITO_credit)
+      return(LITO_credit)
+      
+    }
+    LITO_credit <- calculate_LITO(gross_income)
   }
 
   LMITO_credit <- 0
@@ -61,7 +81,19 @@ calc_income_tax <- function(gross_income,work_income) {
     }
   }
   
-  tax <- max(0,(tax_nc + BRL - LITO_credit - LMITO_credit - BTO_credit))
+  SAPTO <- 0
+  
+  if(SAPTO_on == 1){
+    SAPTO <- ifelse(gross_income > SAPTO_Single_Shade_Out & partnered == 0 & Numb_dep > 0,
+                    max(SAPTO_Single_Max - (gross_income - SAPTO_Single_Shade_Out) * SAPTO_Rate, 0),
+                    SAPTO )
+    
+    SAPTO <- ifelse(gross_income < SAPTO_Single_Shade_Out & partnered == 0 & Numb_dep > 0,
+                    SAPTO_Single_Max, SAPTO )
+    BTO_credit <- ifelse(BTO_on == 1 & partnered == 0 & Numb_dep > 0 , 0, BTO_credit)
+  }
+  
+  tax <- max(0,(tax_nc + BRL - LITO_credit - LMITO_credit - BTO_credit - SAPTO))
   
   medicarelevy <- 0 
  
@@ -76,20 +108,35 @@ if(partnered == 0 & Numb_dep == 0){
     medicarelevy <-  gross_income * 0.02
   } 
 }
-  
+ 
   if(partnered == 1 | Numb_dep > 0){
-    if(gross_income > medi_LI_threshold_P + Numb_dep * medi_dep_LI_threshold & 
-       gross_income < medi_PI_threshold_P + Numb_dep * medi_dep_PI_threshold ){
+    
+    
+    
+    if(gross_income + partner_earnings >= medi_LI_threshold_P + (Numb_dep * medi_dep_LI_threshold)  &
+       gross_income + partner_earnings < medi_PI_threshold_P + (medi_dep_PI_threshold * Numb_dep)){
       
-      medicarelevy <-  (gross_income - medi_LI_threshold_P - Numb_dep * medi_dep_LI_threshold) * 0.1
+      medicarelevy <-  (gross_income + partner_earnings - medi_LI_threshold_P - Numb_dep * medi_dep_LI_threshold) * 0.1
     } 
     
-    if( gross_income >= medi_PI_threshold_P + Numb_dep * medi_dep_PI_threshold){
+    if(gross_income + partner_earnings > medi_PI_threshold_P + medi_dep_PI_threshold * Numb_dep & 
+       gross_income >= medi_LI_threshold_S & gross_income < medi_PI_threshold_S ){
+      
+      medicarelevy <-  (gross_income - medi_LI_threshold_S) * 0.1
+    }
+    
+    
+      
+    
+    if( gross_income > medi_PI_threshold_S & gross_income + partner_earnings > medi_PI_threshold_P + medi_dep_PI_threshold * Numb_dep){
       
       medicarelevy <-  gross_income * 0.02
     } 
-  }
-  
-  
+    if(gross_income < medi_LI_threshold_S){
+      medicarelevy <- 0 
+    }
+    
+  }  
+   
   return(list(tax = tax, medicarelevy = medicarelevy))
 }

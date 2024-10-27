@@ -163,9 +163,9 @@ function(input, output, session) {
 ### Calculator itself begins here. 
     
 #### Load in relevant policy parameters 
-  policy_date1 <- "Q3_2024" 
+  policy_date1 <<- "Q3_2024" 
   policy_year <<- as.numeric(substring(policy_date1, 4,7))
-  policy_quarter <- as.numeric(substring(policy_date1,2,2))
+  policy_quarter <<- as.numeric(substring(policy_date1,2,2))
   policy_parameters_1 <- policy_parameters(policy_date1)
   
   # Assign policy parameters from the policy file.
@@ -223,13 +223,16 @@ function(input, output, session) {
   
 ##### medicare levy   
   Medicare_levy_on <<- ifelse(input$medicare_levy == TRUE, 0, 1)
-  
+  work_for_the_dole <<- 0
+  living_alone <<- 1 
+  SAPTO_on <<- 1 
 ##### Rent assistance abatement   
   RA_Abate <<-1 
     RA_Abate <<- ifelse(input$RA_Abate == TRUE, 0, 1)
+    
 #### BTO
     
-  BTO_on <<- 1 
+  BTO_on <<- 1
   
 #### INCOME TAX BRACKETS 
   
@@ -246,6 +249,7 @@ function(input, output, session) {
     edited_tax_brackets <<- ifelse(input$edit_tax_brackets == TRUE, 1, 0)
     LITO_on <<- ifelse(input$turn_off_LITO == TRUE , 0, 1)
     BTO_on <<- ifelse(input$turn_off_BTO == TRUE, 0 , 1 )
+    SAPTO_on <<- ifelse(input$turn_off_SAPTO == TRUE, 0, 1)
   }
 
   
@@ -314,7 +318,7 @@ function(input, output, session) {
     # annual 
     results_df[, "income_tax"] <- results_df[, "income_tax"] * -1 
     results_df[, "HECS_payment"] <- results_df[, "HECS_payment"] * -1 
-    results_df[, "taxable_benefit"] <- results_df[, "taxable_benefit"] * 26
+    results_df[, "taxable_benefit"] <- results_df[, "taxable_benefit"]
     
     return(as.data.frame(results_df))
   }
@@ -424,9 +428,7 @@ function(input, output, session) {
   ### Increments of 1 rather than 0.1 
   
   incomes_data_hourly <- calculator_function(wage, 1)
-  
-  ### Calculate the changes in variables from working an additional hour. 
-  
+   ### Calculate the changes in variables from working an additional hour. 
   incomes_changes <- incomes_data_hourly %>%
     mutate(across(-hours, ~. - lag(., default = first(.))), .names = "change_{.col}") %>%
     mutate(across(starts_with("change_"), ~if_else(row_number() == 1, 0, .)))
@@ -529,7 +531,7 @@ function(input, output, session) {
                                  "Commonwealth Rent Assistance" = e61_orangelight, 
                                  "Pharmacutical Allowance" = "forestgreen"))
   
-
+ 
   output$plot2 <- renderPlotly({ EMTR_Schedule })
   
   

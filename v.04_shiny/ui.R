@@ -105,7 +105,9 @@ fluidPage(
                               value = 4, min = 0, max = 10),
                  checkboxInput("turn_off_LITO",
                                "Turn off LITO (Low Income Tax Offset)"),
-                 checkboxInput("turn_off_BTO",
+                 checkboxInput("turn_off_SAPTO",
+                               "Turn off SAPTO (Seniors and Pensioners Tax Offset)"),
+                                checkboxInput("turn_off_BTO",
                                "Turn off the Beneficiary tax offset"),
                  uiOutput("tax_brackets_inputs")
                ), 

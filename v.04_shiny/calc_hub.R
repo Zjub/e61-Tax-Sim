@@ -2,9 +2,9 @@
 calc_hub <- function(wage_rate, hours, HECSon, Medicare_levy_on) {
   work_income <- wage_rate * hours * 52
   
-  taxable_benefit <- calc_benefit_abated(work_income,partner_earnings)[["taxable_benefit"]]
+  taxable_benefit <- calc_benefit_abated(work_income,partner_earnings)[["taxable_benefit"]] * 26
   
-  gross_income = work_income + (taxable_benefit)*26
+  gross_income = work_income + (taxable_benefit)
   
   income_tax <- calc_income_tax(gross_income,work_income)[["tax"]]
   
