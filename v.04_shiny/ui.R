@@ -145,8 +145,10 @@ fluidPage(
       ### Load in the two charts as plotly objects. "With Spinner" provides a signal to 
       ## the user that the charts are loading. 
       fluidRow(
-        column(width = 6, withSpinner(plotlyOutput("plot", width = "100%", height = "600px"))),
-        column(width = 6, withSpinner(plotlyOutput("plot2", width = "100%", height = "600px")))
+               column(width = 6,checkboxInput("Detailed_1", "Show Detailed Results", value = FALSE),
+               withSpinner(plotlyOutput("plot", width = "100%", height = "600px"))),
+        column(width = 6, checkboxInput("Detailed_2", "Show Detailed Results", value = FALSE),
+               withSpinner(plotlyOutput("plot2", width = "100%", height = "600px")))
       ), 
       #### Load in text for interpretation, which is created in the server. 
       textOutput("debug_text"), 

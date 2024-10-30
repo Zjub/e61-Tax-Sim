@@ -394,7 +394,7 @@ function(input, output, session) {
   
   
   # Plotting the Hours Schedule. 
-  Hours_Schedule <- ggplot() +
+  Hours_Schedule_full <- ggplot() +
     geom_col(data = all_incomes_long,
              aes(x = hours, y = Amount / 1000  , fill = `Income Type`), width = 0.5 ) +
     geom_line(data = incomes_data_hourly, aes(x = hours, y = `Net Income` ), 
@@ -418,9 +418,25 @@ function(input, output, session) {
                                  "Work Income" = e61_teallight, 
                                  "Pharmacutical Allowance" = "forestgreen"))
   
+  Hours_Schedule_simple <- ggplot()  +
+    geom_line(data = incomes_data_hourly, aes(x = hours, y = `Net Income` ), 
+              col = "black") +
+    labs_e61(title = text_string,
+             x = "Hours worked",
+             y = "$ (000's)",
+             fill = "Income Type",
+             colour = "") + add_baseline() +
+    scale_x_continuous(expand = c(0, Inf)) + # Remove default expansion for x-axis
+    scale_y_continuous(expand = c(0, 0), limits =c(min_amount, max_net_income)) + 
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed")
   
   
-  output$plot <- renderPlotly({ Hours_Schedule })
+
+  # Use renderPlotly to switch between them
+  output$plot <- renderPlotly({ 
+    plot_to_display <- if (input$Detailed_1) Hours_Schedule_full else  Hours_Schedule_simple
+    ggplotly(plot_to_display)
+  })
   
   ######################################################################################
   ### EMTR Chart - hours worked. 
@@ -505,7 +521,7 @@ function(input, output, session) {
 
   
   # Plotting
-  EMTR_Schedule  <- ggplot() +
+  EMTR_Schedule_complex  <- ggplot() +
     geom_col(data = all_ratios_long, aes(x = hours,
                                          y = EMTR, fill = `Tax/Transfer`),
              width = 2) +
@@ -531,9 +547,26 @@ function(input, output, session) {
                                  "Commonwealth Rent Assistance" = e61_orangelight, 
                                  "Pharmacutical Allowance" = "forestgreen"))
   
- 
-  output$plot2 <- renderPlotly({ EMTR_Schedule })
   
+  EMTR_Schedule_simple <- ggplot() +
+    geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ), 
+              col = "black" ) + 
+    geom_line(data = incomes_data_hourly, aes( x = hours, y = `Average Tax Rate`),
+              col = "grey", linetype = "dashed") + 
+    scale_colour_manual(values = c("Net Income" = "black")) +
+    labs_e61(title = "EMTR from working an additional hour a week",
+             x = "Hours Worked",
+             y = "EMTR",
+             fill = "Income Type",
+             colour = "") + add_baseline()  + scale_fill_e61() + 
+    geom_hline(yintercept = 1, linetype = "dashed", col = "red")
+  
+  output$plot2 <- renderPlotly({ 
+    plot_to_display <- if (input$Detailed_2) EMTR_Schedule_complex else  EMTR_Schedule_simple 
+    ggplotly(plot_to_display)
+  })
+ 
+ 
   
 #### Ensure that the text is correct to describe the charts. 
   
@@ -763,6 +796,5 @@ function(input, output, session) {
   }
   })
  
-  
    
 }
