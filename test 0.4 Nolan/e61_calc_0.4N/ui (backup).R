@@ -62,7 +62,7 @@ fluidPage(
                  
                  #### If Partnered selected, load a box for Partner's income
                  conditionalPanel(
-                   condition = "input.partnered == TRUE",
+                   condition = "input.partnered == true",
                    numericInput("partner_income", "Partner's Income (Annual):", value = 0, min = 0)
                  ),
                  
@@ -71,7 +71,7 @@ fluidPage(
                  
                  # If Renter Selected, load a box for Weekly Rent
                  conditionalPanel(
-                   condition = "input.renter == TRUE",
+                   condition = "input.renter == true",
                    numericInput("weekly_rent", "Weekly Rent:", value = 0, min = 0)
                  ),
                  
@@ -86,7 +86,7 @@ fluidPage(
                  
                  # If HECS debt selected, load in a box to enter their HECS debt
                  conditionalPanel(
-                   condition = "input.hecs_debt == TRUE",
+                   condition = "input.hecs_debt == true",
                    numericInput("total_hecs_debt", "Total HECS Debt:", value = 0, min = 0)
                  ),
                  # Box to include the medicare levy 
@@ -100,7 +100,7 @@ fluidPage(
                  # If selected, load a box to select the number of tax brackets desired, and 
                  # 2* that many numeric boxes. One for the tax rate, and one for the threshold 
                  conditionalPanel(
-                   condition = "input.edit_tax_brackets == TRUE",
+                   condition = "input.edit_tax_brackets == true",
                    numericInput("num_tax_brackets", "Number of Tax Brackets:",
                                 value = 4, min = 0, max = 10),
                    checkboxInput("turn_off_LITO",
@@ -114,7 +114,7 @@ fluidPage(
                                "Edit Job Seeker and Parenting Payment (All values are weekly)"),
                  # load 4 boxes, (Job Seeker, PP) * (Single, Couple)
                  conditionalPanel(
-                   condition = "input.edit_job_seeker == TRUE",
+                   condition = "input.edit_job_seeker == true",
                    numericInput("job_seeker_single", "Job Seeker - Single Amount:",
                                 value =  693.1 , min = 0),
                    numericInput("job_seeker_couple", "Job Seeker - Couple Amount:",
@@ -122,11 +122,11 @@ fluidPage(
                    numericInput("PP_single", "Parenting Payment - Single Amount:",
                                 value = 922.1, min = 0),
                    numericInput("PP_couple", "Parenting Payment - Couple Amount:",
-                                value = 693.1, min = 0)
+                                value = 693.1, min = 0),
                  ),  
                  # Box for "UBI" mode. Turning off all abatements for PP and JSP
-                 checkboxInput("UBI_mode",
-                               "[Experimental] Introduce a UBI (Everyone recieves Jobseeker or the Parenting Payment
+                 checkboxInput("Experimental UBI_mode",
+                               "Introduce a UBI (Everyone recieves Jobseeker or the Parenting Payment
                             at their maximum rate)"),
                  # Box to not abate RA alongside the main payment
                  checkboxInput("RA_Abate",
@@ -156,18 +156,6 @@ fluidPage(
       
       ## Text box for first plot
       
-      tags$div(
-        style = "margin-top: 30px; margin-bottom: 50px;",
-        bsCollapse(
-          bsCollapsePanel(
-            title = "How do I interpret these incomes?",
-            style = "primary",  # Optional styling (e.g., primary, info, warning, etc.)
-            uiOutput("Income_Title_1"),
-            textOutput("Income_interpretation_text_1")
-          )
-        )
-      ),
-          
       ## Second plot - EMTRs and PTRs
       
       withSpinner(plotlyOutput("plot2", width = "100%", height = "600px")),
@@ -175,34 +163,21 @@ fluidPage(
       ### Text box for second plot
       
       #### Load in text for interpretation, which is created in the server. 
-      tags$div(
-        style = "margin-top: 30px; margin-bottom: 50px;",
-        bsCollapse(
-          bsCollapsePanel(
-            title = "What are these tax and income concepts?",
-            style = "primary",
-  
-            br(),  # Adds a single line break
-            tags$div(style = "margin-top: 5px;"),  # Adds top margin 
-            
-            # Add each text output with spaces in between
-            textOutput("debug_text"),
-            br(),  
-            uiOutput("Title_1"),
-            textOutput("interpretation_text"),
-            br(),  
-            uiOutput("Title_2"),
-            textOutput("interpretation_text_2"),
-            br(),  
-            uiOutput("Title_3"),
-            textOutput("interpretation_text_3"),
-            br(),  
-            uiOutput("Title_4"),
-            textOutput("interpretation_text_4"),
-            br()  
-          )
+      bsCollapse(
+        bsCollapsePanel(
+          title = "What are these tax and income concepts?",
+          style = "primary",  # Optional styling (e.g., primary, info, warning, etc.)
+          textOutput("debug_text"),
+          uiOutput("Title_1"),
+          textOutput("interpretation_text"),
+          uiOutput("Title_2"),
+          textOutput("interpretation_text_2"),
+          uiOutput("Title_3"),
+          textOutput("interpretation_text_3"),
+          uiOutput("Title_4"),
+          textOutput("interpretation_text_4")
         )
-        ),
+      ),
       
       ### Accreditation, with the current date. 
       div(style = "margin-top: 20px;",  # Adds some margin at the top

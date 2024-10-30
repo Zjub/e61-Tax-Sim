@@ -14,7 +14,7 @@ pacman::p_load(
   tidyverse,
   data.table,
   plotly,
-  theme61, shiny, shinycssloaders)
+  theme61, shiny, shinycssloaders, shinyBS)
 
 ###### Load in all the calc scripts to run the code
 scripts <- list.files(pattern = "calc_")
@@ -37,7 +37,7 @@ basis_text2 <- "hour worked"
 ##### Create a function which observes the number of dependents, and creates a box
 ##### for each dependent, and adds a descriptive with which child number they are. 
 
-function(input, output, session) {
+server <- function(input, output, session) {
   observeEvent(input$num_dependents, {
     # Generate child age inputs dynamically based on the number of dependents
     output$child_age_inputs <- renderUI({
@@ -90,7 +90,7 @@ function(input, output, session) {
   observeEvent(c(input$update_input), {
     # Import parameters for the given quarter ----
     output$Title_1 <- renderUI({
-      HTML("<b>How do I interpret these charts?</b>")
+      HTML("<b>How do I interpret these series?</b>")
     })
     
     ###### Text 1 - how do you interpret the charts     
@@ -429,9 +429,23 @@ function(input, output, session) {
         plab(label=c("Net Income","Wage earnings"),x=c(5,5),y=c(max(incomes_data_hourly$`Net Income`)*1.1,max(incomes_data_hourly$`Net Income`)*1.15),colour=c("black","blue"))
       
       output$plot <- renderPlotly({
-        if (input$toggle_plot) {
+        if (input$toggle_plot == TRUE) {
           Hours_Schedule } else {
             Simple_Hours_Schedule}})
+
+      # output$plot <- renderPlotly({
+      #   tryCatch({
+      #     if (input$toggle_plot) {
+      #       ggplotly(Hours_Schedule)
+      #     } else {
+      #       ggplotly(Simple_Hours_Schedule)
+      #     }
+      #   }, error = function(e) {
+      #     message("Error in plotting: ", e$message)
+      #     NULL  # Return NULL if an error occurs
+      #   })
+      # })
+      
       
       ######################################################################################
       ### EMTR Chart - hours worked. 
@@ -522,47 +536,60 @@ function(input, output, session) {
         geom_col(data = all_ratios_long, aes(x = hours,
                                              y = EMTR, fill = `Tax/Transfer`),
                  width = 2) +
-        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ), 
-                  col = "black" ) + 
+        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ),
+                  col = "black" ) +
         geom_line(data = incomes_data_hourly, aes( x = hours, y = `Average Tax Rate`),
-                  col = "grey", linetype = "dashed") + 
+                  col = "grey", linetype = "dashed") +
         scale_colour_manual(values = c("Net Income" = "black")) +
         labs_e61(title = "EMTR from working an additional hour a week",
                  x = "Hours Worked",
                  y = "EMTR",
                  fill = "Income Type",
-                 colour = "") + add_baseline()  + scale_fill_e61() + 
-        geom_hline(yintercept = 1, linetype = "dashed", col = "red") + 
+                 colour = "") + add_baseline()  + scale_fill_e61() +
+        geom_hline(yintercept = 1, linetype = "dashed", col = "red") +
         scale_fill_manual(values = c("Energy Supplement" = e61_tealdark,
-                                     "HECS Payment" = e61_bluedark, 
-                                     "Income Tax" = e61_greydark, 
+                                     "HECS Payment" = e61_bluedark,
+                                     "Income Tax" = e61_greydark,
                                      "Job Seeker Payment" = e61_bluelight,
-                                     "Medicare Levy" = e61_coraldark , 
-                                     "Family Tax Benefit A" = e61_corallight, 
-                                     "Family Tax Benefit B" = e61_maroondark, 
-                                     "Parenting Payment" = e61_orangedark, 
-                                     "Commonwealth Rent Assistance" = e61_orangelight, 
+                                     "Medicare Levy" = e61_coraldark ,
+                                     "Family Tax Benefit A" = e61_corallight,
+                                     "Family Tax Benefit B" = e61_maroondark,
+                                     "Parenting Payment" = e61_orangedark,
+                                     "Commonwealth Rent Assistance" = e61_orangelight,
                                      "Pharmacutical Allowance" = "forestgreen"))
-      
-      
+
+
       # Plot the simplified graph
-      
-      Simple_EMTR_Schedule <- ggplot() + 
-        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ), 
-                  col = "black" ) + 
+
+      Simple_EMTR_Schedule <- ggplot() +
+        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ),
+                  col = "black" ) +
         geom_line(data = incomes_data_hourly, aes( x = hours, y = `Average Tax Rate`),
                   col = "blue", linetype = "dashed") +
         labs_e61(title = "EMTR from working an additional hour a week",
                  x = "Hours Worked",
-                 y = "EMTR") + add_baseline()  + scale_fill_e61() + 
+                 y = "EMTR") + add_baseline()  + scale_fill_e61() +
         geom_hline(yintercept = 1, linetype = "dashed", col = "red") +
         plab(label=c("EMTR","PTR"),x=c(5,5),y=c(max(all_ratios_long$`Total EMTR`)*1.1,max(all_ratios_long$`Total EMTR`)*1.20),colour=c("black","blue")) + scale_y_continuous(labels=scales::percent_format())
-      
+
       output$plot2 <- renderPlotly({
-        if (input$toggle_plot) {
+        if (input$toggle_plot == TRUE) {
           EMTR_Schedule } else {
             Simple_EMTR_Schedule}})
+
       
+      # output$plot2 <- renderPlotly({
+      #   tryCatch({
+      #     if (input$toggle_plot == TRUE) {
+      #       ggplotly(EMTR_Schedule)
+      #     } else {
+      #       ggplotly(Simple_EMTR_Schedule)
+      #     }
+      #   }, error = function(e) {
+      #     message("Error in plotting: ", e$message)
+      #     NULL  # Return NULL if an error occurs
+      #   })
+      # })
       
       
       #### Ensure that the text is correct to describe the charts. 
@@ -684,7 +711,7 @@ function(input, output, session) {
         plab(label=c("Net Income","Wage earnings"),x=c(5,5),y=c(max(incomes_data_private$`Net Income`)*1.1,max(incomes_data_private$`Net Income`)*1.15),colour=c("black","blue"))
       
       output$plot <- renderPlotly({
-        if (input$toggle_plot) {
+        if (input$toggle_plot == TRUE) {
           Income_Schedule } else {
             Simple_Income_Schedule}})
     
@@ -805,32 +832,7 @@ function(input, output, session) {
                                      "Pharmacutical Allowance" = "forestgreen"))
       
       
-      EMTR_Schedule  <- ggplot() +
-        geom_col(data = all_ratios_long, aes(x = `Private Income (000s)`,
-                                             y = EMTR, fill = `Tax/Transfer`),
-                 width = 2) +
-        geom_line(data = all_ratios_long, aes(x = `Private Income (000s)`, y = `Total EMTR` ), 
-                  col = "black" ) + 
-        geom_line(data = incomes_data_private, aes( x = `Private Income (000s)`,
-                                                    y = `Average Tax Rate`),
-                  col = "grey", linetype = "dashed") + 
-        scale_colour_manual(values = c("Net Income" = "black")) +
-        labs_e61(title = "EMTR from earning an additional $1000",
-                 x = "Private Income (000s)",
-                 y = "EMTR",
-                 fill = "Income Type",
-                 colour = "") + add_baseline()  + scale_fill_e61() + 
-        geom_hline(yintercept = 1, linetype = "dashed", col = "red") + 
-        scale_fill_manual(values = c("Energy Supplement" = e61_tealdark,
-                                     "HECS Payment" = e61_bluedark, 
-                                     "Income Tax" = e61_greydark, 
-                                     "Job Seeker Payment" = e61_bluelight,
-                                     "Medicare Levy" = e61_coraldark , 
-                                     "Family Tax Benefit A" = e61_corallight, 
-                                     "Family Tax Benefit B" = e61_maroondark,
-                                     "Parenting Payment" = e61_orangedark, 
-                                     "Commonwealth Rent Assistance" = e61_orangelight, 
-                                     "Pharmacutical Allowance" = "forestgreen"))
+      # Simple version graph 
       
       Simple_EMTR_Schedule <- ggplot() + 
         geom_line(data = all_ratios_long, aes(x = `Private Income (000s)`, y = `Total EMTR` ), 
@@ -842,9 +844,9 @@ function(input, output, session) {
                  y = "EMTR") + add_baseline()  + scale_fill_e61() + 
         geom_hline(yintercept = 1, linetype = "dashed", col = "red") +
         plab(label=c("EMTR","PTR"),x=c(5,5),y=c(max(all_ratios_long$`Total EMTR`)*1.1,max(all_ratios_long$`Total EMTR`)*1.20),colour=c("black","blue")) + scale_y_continuous(labels=scales::percent_format())
-      
+
       output$plot2 <- renderPlotly({
-        if (input$toggle_plot) {
+        if (input$toggle_plot == TRUE) {
           EMTR_Schedule } else {
             Simple_EMTR_Schedule}})
       

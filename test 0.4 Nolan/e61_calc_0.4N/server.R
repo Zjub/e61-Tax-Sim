@@ -89,8 +89,24 @@ server <- function(input, output, session) {
   
   observeEvent(c(input$update_input), {
     # Import parameters for the given quarter ----
+    output$Income_Title_1 <- renderUI({
+      HTML("<b>What are these income numbers?</b>")
+    })
+    
+    output$Income_interpretation_text_1 <- renderText({
+      paste("Placeholder text about ", basis_text," choices",sep="")
+    })
+    
+    output$Income_Title_2 <- renderUI({
+      HTML("<b>Give me an example</b>")
+    })
+    
+    output$Income_interpretation_text_2 <- renderText({
+      paste("Placeholder text about ", basis_text," choices",sep="")
+    })
+    
     output$Title_1 <- renderUI({
-      HTML("<b>How do I interpret these charts?</b>")
+      HTML("<b>How do I interpret these series?</b>")
     })
     
     ###### Text 1 - how do you interpret the charts     
@@ -394,7 +410,7 @@ server <- function(input, output, session) {
         geom_col(data = all_incomes_long,
                  aes(x = hours, y = Amount / 1000  , fill = `Income Type`), width = 0.5 ) +
         geom_line(data = incomes_data_hourly, aes(x = hours, y = `Net Income` ), 
-                  size = 2, col = "black") +
+                  size = 1, col = "black") +
         labs_e61(title = text_string,
                  x = "Hours worked",
                  y = "$ (000's)",
@@ -536,42 +552,42 @@ server <- function(input, output, session) {
         geom_col(data = all_ratios_long, aes(x = hours,
                                              y = EMTR, fill = `Tax/Transfer`),
                  width = 2) +
-        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ), 
-                  col = "black" ) + 
+        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ),
+                  col = "black" ) +
         geom_line(data = incomes_data_hourly, aes( x = hours, y = `Average Tax Rate`),
-                  col = "grey", linetype = "dashed") + 
+                  col = "grey", linetype = "dashed") +
         scale_colour_manual(values = c("Net Income" = "black")) +
         labs_e61(title = "EMTR from working an additional hour a week",
                  x = "Hours Worked",
                  y = "EMTR",
                  fill = "Income Type",
-                 colour = "") + add_baseline()  + scale_fill_e61() + 
-        geom_hline(yintercept = 1, linetype = "dashed", col = "red") + 
+                 colour = "") + add_baseline()  + scale_fill_e61() +
+        geom_hline(yintercept = 1, linetype = "dashed", col = "red") +
         scale_fill_manual(values = c("Energy Supplement" = e61_tealdark,
-                                     "HECS Payment" = e61_bluedark, 
-                                     "Income Tax" = e61_greydark, 
+                                     "HECS Payment" = e61_bluedark,
+                                     "Income Tax" = e61_greydark,
                                      "Job Seeker Payment" = e61_bluelight,
-                                     "Medicare Levy" = e61_coraldark , 
-                                     "Family Tax Benefit A" = e61_corallight, 
-                                     "Family Tax Benefit B" = e61_maroondark, 
-                                     "Parenting Payment" = e61_orangedark, 
-                                     "Commonwealth Rent Assistance" = e61_orangelight, 
+                                     "Medicare Levy" = e61_coraldark ,
+                                     "Family Tax Benefit A" = e61_corallight,
+                                     "Family Tax Benefit B" = e61_maroondark,
+                                     "Parenting Payment" = e61_orangedark,
+                                     "Commonwealth Rent Assistance" = e61_orangelight,
                                      "Pharmacutical Allowance" = "forestgreen"))
-      
-      
+
+
       # Plot the simplified graph
-      
-      Simple_EMTR_Schedule <- ggplot() + 
-        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ), 
-                  col = "black" ) + 
+
+      Simple_EMTR_Schedule <- ggplot() +
+        geom_line(data = all_ratios_long, aes(x = hours, y = `Total EMTR` ),
+                  col = "black" ) +
         geom_line(data = incomes_data_hourly, aes( x = hours, y = `Average Tax Rate`),
                   col = "blue", linetype = "dashed") +
         labs_e61(title = "EMTR from working an additional hour a week",
                  x = "Hours Worked",
-                 y = "EMTR") + add_baseline()  + scale_fill_e61() + 
+                 y = "EMTR") + add_baseline()  + scale_fill_e61() +
         geom_hline(yintercept = 1, linetype = "dashed", col = "red") +
         plab(label=c("EMTR","PTR"),x=c(5,5),y=c(max(all_ratios_long$`Total EMTR`)*1.1,max(all_ratios_long$`Total EMTR`)*1.20),colour=c("black","blue")) + scale_y_continuous(labels=scales::percent_format())
-      
+
       output$plot2 <- renderPlotly({
         if (input$toggle_plot == TRUE) {
           EMTR_Schedule } else {
@@ -676,7 +692,7 @@ server <- function(input, output, session) {
                      y = Amount , fill = `Income Type`), width = 0.5 ) +
         geom_line(data = incomes_data_private,
                   aes(x = `Private Income (000s)`, y = `Net Income`), 
-                  size = 2, col = "black") +
+                  size = 1, col = "black") +
         labs_e61(title = text_string,
                  x = "Private Income (000s)",
                  y = "$ (000s)",
@@ -700,7 +716,7 @@ server <- function(input, output, session) {
       Simple_Income_Schedule <- ggplot() + 
         geom_line(data = incomes_data_private,
                   aes(x = `Private Income (000s)`, y = `Net Income`), 
-                  size = 2, col = "black") +
+                  size = 1, col = "black") +
         geom_line(data = incomes_data_private, aes(x = hours, y = `work_income`/1000 ), 
                   size = 1, col = "blue",linetype="dashed") +
         labs_e61(title = text_string,
@@ -837,14 +853,14 @@ server <- function(input, output, session) {
       Simple_EMTR_Schedule <- ggplot() + 
         geom_line(data = all_ratios_long, aes(x = `Private Income (000s)`, y = `Total EMTR` ), 
                   col = "black" ) + 
-        geom_line(data = incomes_data_hourly, aes( x = `Private Income (000s)`, y = `Average Tax Rate`),
+        geom_line(data = incomes_data_private, aes( x = `Private Income (000s)`, y = `Average Tax Rate`),
                   col = "blue", linetype = "dashed") +
         labs_e61(title = "EMTR from earning an additional $1000",
                  x = "Private Income (000s)",
                  y = "EMTR") + add_baseline()  + scale_fill_e61() + 
         geom_hline(yintercept = 1, linetype = "dashed", col = "red") +
         plab(label=c("EMTR","PTR"),x=c(5,5),y=c(max(all_ratios_long$`Total EMTR`)*1.1,max(all_ratios_long$`Total EMTR`)*1.20),colour=c("black","blue")) + scale_y_continuous(labels=scales::percent_format())
-      
+
       output$plot2 <- renderPlotly({
         if (input$toggle_plot == TRUE) {
           EMTR_Schedule } else {
