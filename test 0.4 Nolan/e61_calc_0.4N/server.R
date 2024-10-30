@@ -94,16 +94,30 @@ server <- function(input, output, session) {
     })
     
     output$Income_interpretation_text_1 <- renderText({
-      paste("Placeholder text about ", basis_text," choices",sep="")
-    })
+      if (input$basis == "hours"){
+        paste("Placeholder text about ", basis_text," choices.
+            If this individual works ",target_level,
+              " hours per week wage income their take home pay would be $",format(round(target_net, 0), big.mark = ",", nsmall = 0)," after earning $",format(round(target_gross, 0), big.mark = ",", nsmall = 0)," in wages.",sep="")
+        
+      } else{paste("Placeholder text about ", basis_text," choices.
+            If this individual earns ",target_level,
+            " per year in wage income their take home pay would be $",format(round(target_net, 0), big.mark = ",", nsmall = 0),sep="")
+    }})
     
     output$Income_Title_2 <- renderUI({
-      HTML("<b>Give me an example</b>")
+      HTML("<b>Can you give me an example based on my question?</b>")
     })
     
     output$Income_interpretation_text_2 <- renderText({
-      paste("Placeholder text about ", basis_text," choices",sep="")
-    })
+      if (input$basis == "hours"){
+        paste("Placeholder text about ", basis_text," choices.
+            If this individual works ",target_level,
+              " hours per week wage income their take home pay would be $",format(round(target_net, 0), big.mark = ",", nsmall = 0)," after earning $",format(round(target_gross, 0), big.mark = ",", nsmall = 0)," in wages.",sep="")
+        
+      } else{paste("Placeholder text about ", basis_text," choices.
+            If this individual earns ",target_level,
+                   " per year in wage income their take home pay would be",format(round(target_net, 0), big.mark = ",", nsmall = 0),sep="")
+      }})
     
     output$Title_1 <- renderUI({
       HTML("<b>How do I interpret these series?</b>")
@@ -125,6 +139,8 @@ server <- function(input, output, session) {
             in response to changes in their labour 
             market engagement.")
     })
+    
+    
     
     output$Title_2 <- renderUI({
       HTML("<b>What is an EMTR?</b>")
@@ -173,7 +189,46 @@ server <- function(input, output, session) {
       is the average effective tax rate paid by the person. This is the average rate the 
       individual is taxed and have their transfers withdrawn, relative to no labour market
       engagement."
-    }) 
+    })
+    
+    output$Ass_Title_1 <- renderUI({
+      HTML("<b>Assuptions in this model?</b>")
+    })
+    
+    
+    output$Ass_interpretation_text_1 <- renderText({
+      if (input$basis == "hours") {
+        paste0(
+          "Placeholder text about ", basis_text, " assumptions. If this individual works ", target_level,
+          " hours per week, their take-home pay would be $",
+          format(round(target_net, 0), big.mark = ",", nsmall = 0),
+          " after earning $",
+          format(round(target_gross, 0), big.mark = ",", nsmall = 0),
+          " in their job."
+          )
+      } else {
+        paste0(
+          "Placeholder text about ", basis_text, " choices. If this individual earns ", target_level,
+          " per year in wage income, their take-home pay would be $",
+          format(round(all_incomes_long[1, 1], 0), big.mark = ",", nsmall = 0))
+      }
+    })
+    
+    output$Ass_interpretation_text_2 <- renderUI({
+      if (input$basis == "hours") {
+        HTML("<ul>
+          <li>Bullet point 1: additional info</li>
+          <li>Bullet point 2: further explanation</li>
+          <li>Bullet point 3: other details</li>
+          </ul>")
+      } else {
+        HTML("<ul>
+          <li>Bullet point A: additional info</li>
+          <li>Bullet point B: further explanation</li>
+          </ul>")
+      }
+    })
+    
     
     ##########################################################################################
     ### Calculator itself begins here. 
@@ -218,6 +273,7 @@ server <- function(input, output, session) {
     max_hours <<-ifelse(input$basis == "hours", input$max_hours, input$max_income)
     max_private_earnings <<- ifelse(input$basis == "income",  input$max_income / 1000, 100)
     max_range <<- round(ifelse(input$basis == "hours", input$max_hours, input$max_income / 1000))
+    target_level <<- ifelse(input$basis == "hours", input$target_hours, input$target_income)
     # hard coded/ irrelevant characteristics at this stage. 
     Carer <<-0
     Disability <<-0
@@ -239,6 +295,9 @@ server <- function(input, output, session) {
     
     ##### medicare levy   
     Medicare_levy_on <<- ifelse(input$medicare_levy == TRUE, 0, 1)
+    work_for_the_dole <<- 0
+    living_alone <<- 1 
+    SAPTO_on <<- 1 
     
     ##### Rent assistance abatement   
     RA_Abate <<-1 
@@ -613,6 +672,11 @@ server <- function(input, output, session) {
       basis_text <- "hours"
       basis_text2 <- "hour worked"
       
+      setDT(incomes_data_hourly)
+      
+      target_net <- incomes_data_hourly[hours == target_level]$net_income
+      target_gross <- incomes_data_hourly[hours == target_level]$work_income 
+      
       
       ###### Income Basis #####################################################################  
     } else if (input$basis == "income") {
@@ -868,6 +932,8 @@ server <- function(input, output, session) {
       
       basis_text <- "income"
       basis_text2 <- "$1000 dollars of labour market income earned"
+      
+      #target_net <- incomes_data_private$`Private Income (000s)` == target_level/1000]$net_income
     }
   })
   

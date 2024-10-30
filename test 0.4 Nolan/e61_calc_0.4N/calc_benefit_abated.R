@@ -112,7 +112,7 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
   
   
   RA <- ifelse(net_fam_a_flag == 1, 0, calc_benefit_gross()[["RA"]])
-  ES <- ifelse(net_fam_a_flag == 1, 0,  calc_benefit_gross()[["ES"]])
+  ES <- calc_benefit_gross()[["ES"]]
   PA <- calc_benefit_gross()[["PA"]]
   
   JSP <-  calc_benefit_gross()[["JSP_Pay"]]
@@ -156,7 +156,7 @@ calc_benefit_abated <- function(work_income,partner_earnings) {
   ### Final Benefit amounts 
   JSP <-   ifelse( JSP > 0, JSP + work_for_the_dole , JSP)
   taxable_benefit <- JSP + PP_Pay 
-  net_benefit <- JSP + PP_Pay + RA + ES + PA
+  net_benefit <- JSP + PP_Pay #+ #RA + ES + PA
 
   return(list(taxable_benefit = max(taxable_benefit,0), net_benefit = max(net_benefit,0), 
               JSP = max(JSP, 0), PP_Pay = max(PP_Pay, 0), RA = max(RA, 0), ES = max(ES, 0),

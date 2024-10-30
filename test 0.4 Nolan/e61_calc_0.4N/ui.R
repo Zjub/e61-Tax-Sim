@@ -50,6 +50,13 @@ fluidPage(
                    numericInput("wages", "Wages (per hour):", value = 25, min = 1)
                  ),
                  
+                 conditionalPanel(
+                   condition = "input.basis == 'hours'",
+                   numericInput("target_hours",
+                                "The weekly hours of work you'd like information about is:",
+                                value = 20, min = 1,max = max_hours)
+                 ),
+                 
                  ### Income
                  conditionalPanel(
                    condition = "input.basis == 'income'",
@@ -57,12 +64,19 @@ fluidPage(
                                 "The maximum income the individual could earn in a year is:",
                                 value = 50000, min = 1)
                  ),
+                 
+                 conditionalPanel(
+                   condition = "input.basis == 'income'",
+                   numericInput("target_income",
+                                "The income you'd like information about is:",
+                                value = 25000, min = 1,max=max_hours)
+                 ),
                  #### Check Box for Partnered
                  checkboxInput("partnered", "Partnered"),
                  
                  #### If Partnered selected, load a box for Partner's income
                  conditionalPanel(
-                   condition = "input.partnered == TRUE",
+                   condition = "input.partnered == true",
                    numericInput("partner_income", "Partner's Income (Annual):", value = 0, min = 0)
                  ),
                  
@@ -71,12 +85,12 @@ fluidPage(
                  
                  # If Renter Selected, load a box for Weekly Rent
                  conditionalPanel(
-                   condition = "input.renter == TRUE",
+                   condition = "input.renter == true",
                    numericInput("weekly_rent", "Weekly Rent:", value = 0, min = 0)
                  ),
                  
                  # Numeric input for Number of Dependents
-                 numericInput("num_dependents", "Number of Dependents:",
+                 numericInput("num_dependents", "Number of Children (dependents):",
                               value = 0, min = 0, max = 10),
                  
                  # Based upon the number of children selected, load in that many boxes for ages. 
@@ -163,7 +177,9 @@ fluidPage(
             title = "How do I interpret these incomes?",
             style = "primary",  # Optional styling (e.g., primary, info, warning, etc.)
             uiOutput("Income_Title_1"),
-            textOutput("Income_interpretation_text_1")
+            textOutput("Income_interpretation_text_1"),
+            uiOutput("Income_Title_2"),
+            textOutput("Income_interpretation_text_2")
           )
         )
       ),
@@ -203,6 +219,20 @@ fluidPage(
           )
         )
         ),
+      
+      tags$div(
+        style = "margin-top: 30px; margin-bottom: 50px;",
+        bsCollapse(
+          bsCollapsePanel(
+            title = "What Assumptions have you made",
+            style = "primary",
+            # Add text output for the initial text
+            textOutput("Ass_interpretation_text_1"),
+            # Add bullet point output for the list
+            uiOutput("Ass_interpretation_text_2")
+          )
+        )
+      ),
       
       ### Accreditation, with the current date. 
       div(style = "margin-top: 20px;",  # Adds some margin at the top
