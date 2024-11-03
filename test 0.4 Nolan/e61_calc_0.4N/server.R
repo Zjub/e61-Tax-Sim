@@ -270,7 +270,7 @@ server <- function(input, output, session) {
     # Labour market characteristics 
     
     wage <<- ifelse(input$basis == "hours", input$wages, 25)
-    max_hours <<-ifelse(input$basis == "hours", input$max_hours, input$max_income)
+    max_x_var <<-ifelse(input$basis == "hours", input$max_hours, input$max_income)
     max_private_earnings <<- ifelse(input$basis == "income",  input$max_income / 1000, 100)
     max_range <<- round(ifelse(input$basis == "hours", input$max_hours, input$max_income / 1000))
     target_level <<- ifelse(input$basis == "hours", input$target_hours, input$target_income)

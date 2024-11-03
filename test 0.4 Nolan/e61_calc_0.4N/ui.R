@@ -54,7 +54,7 @@ fluidPage(
                    condition = "input.basis == 'hours'",
                    numericInput("target_hours",
                                 "The weekly hours of work you'd like information about is:",
-                                value = 20, min = 1,max = max_hours)
+                                value = 20, min = 1)#, max = max_x_var)
                  ),
                  
                  ### Income
@@ -69,7 +69,7 @@ fluidPage(
                    condition = "input.basis == 'income'",
                    numericInput("target_income",
                                 "The income you'd like information about is:",
-                                value = 25000, min = 1,max=max_hours)
+                                value = 25000, min = 1)#,max = max_x_var)
                  ),
                  #### Check Box for Partnered
                  checkboxInput("partnered", "Partnered"),
