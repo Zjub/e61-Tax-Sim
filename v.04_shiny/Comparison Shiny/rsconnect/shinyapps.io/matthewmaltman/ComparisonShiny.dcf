@@ -1,0 +1,12 @@
+name: ComparisonShiny
+title: ComparisonShiny
+username: matthewmaltman
+account: matthewmaltman
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13221487
+bundleId: 9312164
+url: https://matthewmaltman.shinyapps.io/ComparisonShiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
