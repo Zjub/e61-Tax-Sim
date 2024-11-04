@@ -31,7 +31,7 @@ calc_family_benefit <- function(child_age,gross_fam_income,work_income,taxable_b
                            fam_ftba_eoy_supp * Numb_dep, 0) / 26
   fam_a <- ifelse(fam_a > 0, fam_a + fam_a_ann_supp, 0)
   
-  if (taxable_benefit > 0) {
+  if (taxable_benefit + calc_benefit_abated(work_income,partner_earnings)[["ES"]] + calc_benefit_abated(work_income,partner_earnings)[["PA"]] > 0) {
     First_abatement <- 0
     Second_abatement <- 0
   }else{
