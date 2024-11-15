@@ -53,6 +53,11 @@ server <- function(input, output, session) {
     })
   })
   
+  # Add to make the panel selection dynamic in the UI. Might run faster if we directly set up the relevant pages on the server side here and call - note for a future version.
+  observe({
+    updateTabsetPanel(session, "main_tabs", selected = input$sidebar_tabs)
+  })
+  
   
   
   ##### Create a function which observes the number of tax brackets the user wants to have 
@@ -229,6 +234,9 @@ server <- function(input, output, session) {
       }
     })
     
+    output$Intro_tax_text_1 <- renderText({"This is a tool that allows you to look at how different tax changes will influence the effect the person you designed on the prior tab. These tax changes do not take into account how they are paid for, or the general effects on the economy - so be careful not to over-interpret them!"
+    })
+    
     
     ##########################################################################################
     ### Calculator itself begins here. 
@@ -288,6 +296,7 @@ server <- function(input, output, session) {
                            Main_carer_dep == 1,1,0)
     
     ###### Edited Policy parameters ##########################################################
+    ## Policy sets at the "person" level (for visualisation)
     
     ###### HECS DEBT  
     HECS_on <<- ifelse(input$hecs_debt == TRUE, 1, 0)
@@ -299,61 +308,14 @@ server <- function(input, output, session) {
     living_alone <<- 1 
     SAPTO_on <<- 1 
     
-    ##### Rent assistance abatement   
     RA_Abate <<-1 
-    RA_Abate <<- ifelse(input$RA_Abate == TRUE, 0, 1)
-    #### BTO
     
     BTO_on <<- 1 
     
-    #### INCOME TAX BRACKETS 
-    
-    edited_tax_brackets <<- 0
-    
-    if(input$edit_tax_brackets == TRUE){
-      for (i in 1:input$num_tax_brackets) {
-        assign(paste0("tax_rate_", i), input[[paste0("tax_rate_", i)]], envir = .GlobalEnv)
-        assign(paste0("tax_threshold_", i), input[[paste0("tax_threshold_", i)]],
-               envir = .GlobalEnv)
-      }
-      tax_free <<- ifelse(input$num_tax_brackets > 0, tax_threshold_1, 0)
-      num_brackets <<- input$num_tax_brackets
-      edited_tax_brackets <<- ifelse(input$edit_tax_brackets == TRUE, 1, 0)
-      LITO_on <<- ifelse(input$turn_off_LITO == TRUE , 0, 1)
-      BTO_on <<- ifelse(input$turn_off_BTO == TRUE, 0 , 1 )
-    }
-    
-    
-    #### Edited Jobseker and Parenting Payment 
-    
-    if(input$edit_job_seeker == TRUE){
-      
-      JSP_C_D_pay <<- input$job_seeker_couple
-      JSP_C_ND_pay <<- input$job_seeker_couple
-      
-      JSP_S_D_pay <<- input$job_seeker_single
-      JSP_S_ND_pay <<- input$job_seeker_single
-      
-      PP_C_pay <<- input$PP_couple
-      PP_S_pay <<- input$PP_single
-      
-    }
-    
-    # UBI Mode. Turn all abatements to Infinite.  
-    if(input$UBI_mode == TRUE){
-      
-      #    
-      JSP_S_ND_athresh_1 <<- Inf
-      JSP_S_ND_athresh_2 <<- Inf
-      PP_C_I_Threshold_1 <<- Inf
-      PP_C_I_Threshold_2 <<- Inf
-      PP_C_P_Threshold <<- Inf 
-      PP_S_athresh_2 <<- Inf
-      PP_S_athresh_3 <<- Inf
-      PP_S_athresh_base <<- Inf
-      PP_S_athresh_mult <<- Inf
-    }
-    
+    ######## For the income tax comparisons
+    ### Save two versions - the initial policy parameters, and the edited ones. These differences will be used for the comparison plots.
+    ## Note: For a future version we should see if we can organise our policy parameters a bit more efficiently, so it is clearer - then we can simplify the server to be calls of functions on those datatables. We should do this for the next version (good way to further QA code).
+    # Code shifted
     
     #########################################################################################
     ### Actually Running the results 
@@ -402,67 +364,76 @@ server <- function(input, output, session) {
     
     if (input$basis == "hours") {
       
-      #### Run the results 
-      incomes_data_hourly <- calculator_function(wage, 0.1)
+      incomes_data_hourly <- NULL
+      all_incomes_long <- NULL
+      min_amount <- NULL
+      max_net_income <- NULL
+      text_string <- NULL
       
-      #### Make the results into a long format.   
+      generate_graphdata_hours <- function(){
+        #### Run the results 
+        incomes_data_hourly <<- calculator_function(wage, 0.1)
+        
+        #### Make the results into a long format.   
+        
+        all_incomes_long <<- pivot_longer(incomes_data_hourly, 
+                                         cols = c(income_tax, work_income, RA, JSP, ES, PP_Pay, 
+                                                  net_fam_a_income, net_fam_b_income,
+                                                  HECS_payment, medicare_levy, PA),
+                                         names_to = "income_type", 
+                                         values_to = "Amount")
+        
+        all_incomes_long$income_type <<- as.factor(all_incomes_long$income_type)
+        
+        
+        #### Relabel variables into their actual names that will display in the chart.  
+        
+        levels(all_incomes_long$income_type) <<- c("Energy Supplement", "HECS Payment", "Income Tax", 
+                                                  "Job Seeker Payment", "Medicare Levy", 
+                                                  "Family Tax Benefit A", 
+                                                  "Family Tax Benefit B", "Pharmacutical Allowance", "Parenting Payment", 
+                                                  "Commonwealth Rent Assistance", "Work Income")
+        
+        all_incomes_long$'Income Type' <<- all_incomes_long$income_type
+        
+        
+        ### Round the results to 2 decimal places  
+        
+        all_incomes_long <<- all_incomes_long %>%
+          mutate(Amount = round(Amount, 2))
+        
+        incomes_data_hourly$'Net Income' <<-  incomes_data_hourly$net_income / 1000
+        
+        ##### Ensure the chart has the appropriate maximum range and minimum range 
+        
+        min_amount <<- (min(incomes_data_hourly$income_tax, na.rm = TRUE) + 
+                         min(incomes_data_hourly$HECS_payment, na.rm = TRUE) + 
+                         min(incomes_data_hourly$medicare_levy, na.rm = TRUE)) / 1000  
+        
+        max_net_income <<- ( max(incomes_data_hourly$work_income, na.rm = TRUE) + 
+                              max(incomes_data_hourly$net_fam_a_income, na.rm = TRUE)
+                            + max(incomes_data_hourly$net_fam_b_income, na.rm = TRUE) + 
+                              max(incomes_data_hourly$PP_Pay, na.rm = TRUE) + 
+                              max(incomes_data_hourly$JSP, na.rm = TRUE)+ 
+                              max(incomes_data_hourly$PA, na.rm = TRUE)) / 1000 - min_amount
+        
+        
+        
+        
+        # Creating the text string for the title of the chart 
+        text_string <<- paste("Income schedule for a", 
+                             ifelse(partnered == 1, "partnered", "unpartnered"), 
+                             ifelse(Home_owner == 1, "home owner", "renter")) 
+        
+        # Append Parenting Payment Benefit eligibility for the title of the chart 
+        if (PPeligible == 1 & Numb_dep > 0) {
+          text_string <<- paste(text_string, "eligible for the Parenting Payment")
+        } else if (PPeligible == 0 & Numb_dep > 0) {
+          text_string <<- paste(text_string, ", not eligible for the Parenting Payment")
+        }  
+      }
       
-      all_incomes_long <- pivot_longer(incomes_data_hourly, 
-                                       cols = c(income_tax, work_income, RA, JSP, ES, PP_Pay, 
-                                                net_fam_a_income, net_fam_b_income,
-                                                HECS_payment, medicare_levy, PA),
-                                       names_to = "income_type", 
-                                       values_to = "Amount")
-      
-      all_incomes_long$income_type <- as.factor(all_incomes_long$income_type)
-      
-      
-      #### Relabel variables into their actual names that will display in the chart.  
-      
-      levels(all_incomes_long$income_type) <- c("Energy Supplement", "HECS Payment", "Income Tax", 
-                                                "Job Seeker Payment", "Medicare Levy", 
-                                                "Family Tax Benefit A", 
-                                                "Family Tax Benefit B", "Pharmacutical Allowance", "Parenting Payment", 
-                                                "Commonwealth Rent Assistance", "Work Income")
-      
-      all_incomes_long$'Income Type' <- all_incomes_long$income_type
-      
-      
-      ### Round the results to 2 decimal places  
-      
-      all_incomes_long <- all_incomes_long %>%
-        mutate(Amount = round(Amount, 2))
-      
-      incomes_data_hourly$'Net Income' <-  incomes_data_hourly$net_income / 1000
-      
-      ##### Ensure the chart has the appropriate maximum range and minimum range 
-      
-      min_amount <- (min(incomes_data_hourly$income_tax, na.rm = TRUE) + 
-                       min(incomes_data_hourly$HECS_payment, na.rm = TRUE) + 
-                       min(incomes_data_hourly$medicare_levy, na.rm = TRUE)) / 1000  
-      
-      max_net_income <- ( max(incomes_data_hourly$work_income, na.rm = TRUE) + 
-                            max(incomes_data_hourly$net_fam_a_income, na.rm = TRUE)
-                          + max(incomes_data_hourly$net_fam_b_income, na.rm = TRUE) + 
-                            max(incomes_data_hourly$PP_Pay, na.rm = TRUE) + 
-                            max(incomes_data_hourly$JSP, na.rm = TRUE)+ 
-                            max(incomes_data_hourly$PA, na.rm = TRUE)) / 1000 - min_amount
-      
-      
-      
-      
-      # Creating the text string for the title of the chart 
-      text_string <- paste("Income schedule for a", 
-                           ifelse(partnered == 1, "partnered", "unpartnered"), 
-                           ifelse(Home_owner == 1, "home owner", "renter")) 
-      
-      # Append Parenting Payment Benefit eligibility for the title of the chart 
-      if (PPeligible == 1 & Numb_dep > 0) {
-        text_string <- paste(text_string, "eligible for the Parenting Payment")
-      } else if (PPeligible == 0 & Numb_dep > 0) {
-        text_string <- paste(text_string, ", not eligible for the Parenting Payment")
-      }  
-      
+      generate_graphdata_hours() # This will produce the graph data reflecting the initial policy settings, for the set population.
       
       # Plotting the Hours Schedule. 
       Hours_Schedule <- ggplot() +
@@ -507,20 +478,113 @@ server <- function(input, output, session) {
         if (input$toggle_plot == TRUE) {
           Hours_Schedule } else {
             Simple_Hours_Schedule}})
-
-      # output$plot <- renderPlotly({
-      #   tryCatch({
-      #     if (input$toggle_plot) {
-      #       ggplotly(Hours_Schedule)
-      #     } else {
-      #       ggplotly(Simple_Hours_Schedule)
-      #     }
-      #   }, error = function(e) {
-      #     message("Error in plotting: ", e$message)
-      #     NULL  # Return NULL if an error occurs
-      #   })
-      # })
       
+      setDT(incomes_data_hourly)
+      
+      initial_income <- incomes_data_hourly[,.(hours,`Net Income`)]
+      
+        ######## Income editing code - shift to be after the first plot is generated
+        ##### Rent assistance abatement   
+        
+        RA_Abate <<- ifelse(input$RA_Abate == TRUE, 0, 1)
+        
+        #### INCOME TAX BRACKETS 
+        
+        edited_tax_brackets <<- 0
+        
+        if(input$edit_tax_brackets == TRUE){
+          for (i in 1:input$num_tax_brackets) {
+            assign(paste0("tax_rate_", i), input[[paste0("tax_rate_", i)]], envir = .GlobalEnv)
+            assign(paste0("tax_threshold_", i), input[[paste0("tax_threshold_", i)]],
+                   envir = .GlobalEnv)
+          }
+          tax_free <<- ifelse(input$num_tax_brackets > 0, tax_threshold_1, 0)
+          num_brackets <<- input$num_tax_brackets
+          edited_tax_brackets <<- ifelse(input$edit_tax_brackets == TRUE, 1, 0)
+          LITO_on <<- ifelse(input$turn_off_LITO == TRUE , 0, 1)
+          BTO_on <<- ifelse(input$turn_off_BTO == TRUE, 0 , 1 )
+        }
+        
+        
+        #### Edited Jobseker and Parenting Payment 
+        
+        if(input$edit_job_seeker == TRUE){
+          
+          JSP_C_D_pay <<- input$job_seeker_couple
+          JSP_C_ND_pay <<- input$job_seeker_couple
+          
+          JSP_S_D_pay <<- input$job_seeker_single
+          JSP_S_ND_pay <<- input$job_seeker_single
+          
+          PP_C_pay <<- input$PP_couple
+          PP_S_pay <<- input$PP_single
+          
+        }
+        
+        # UBI Mode. Turn all abatements to Infinite.  
+        if(input$UBI_mode == TRUE){
+          
+          #    
+          JSP_S_ND_athresh_1 <<- Inf
+          JSP_S_ND_athresh_2 <<- Inf
+          PP_C_I_Threshold_1 <<- Inf
+          PP_C_I_Threshold_2 <<- Inf
+          PP_C_P_Threshold <<- Inf 
+          PP_S_athresh_2 <<- Inf
+          PP_S_athresh_3 <<- Inf
+          PP_S_athresh_base <<- Inf
+          PP_S_athresh_mult <<- Inf
+        }
+        
+        generate_graphdata_hours() # This will produce the graph data reflecting the "newly inserted" figures.
+        
+        # Plotting the Hours Schedule. 
+        Hours_Schedule2 <- ggplot() +
+          geom_col(data = all_incomes_long,
+                   aes(x = hours, y = Amount / 1000  , fill = `Income Type`), width = 0.5 ) +
+          geom_line(data = incomes_data_hourly, aes(x = hours, y = `Net Income` ), 
+                    size = 1, col = "black") +
+          labs_e61(title = text_string,
+                   x = "Hours worked",
+                   y = "$ (000's)",
+                   fill = "Income Type",
+                   colour = "") + add_baseline()  + scale_fill_e61() +
+          scale_x_continuous(expand = c(0, Inf)) + # Remove default expansion for x-axis
+          scale_y_continuous(expand = c(0, 0), limits =c(min_amount, max_net_income)) + 
+          scale_fill_manual(values = c("Energy Supplement" = e61_tealdark,
+                                       "HECS Payment" = e61_bluedark,
+                                       "Income Tax" = e61_greydark, 
+                                       "Job Seeker Payment" = e61_bluelight,
+                                       "Medicare Levy" = e61_coraldark , 
+                                       "Family Tax Benefit A" = e61_corallight, 
+                                       "Family Tax Benefit B" = e61_maroondark,
+                                       "Parenting Payment" = e61_orangedark, 
+                                       "Commonwealth Rent Assistance" = e61_orangelight,
+                                       "Work Income" = e61_teallight, 
+                                       "Pharmacutical Allowance" = "forestgreen"))
+        
+        # Plot the simplified graph
+        
+        Simple_Hours_Schedule2 <- ggplot() + 
+          geom_line(data = incomes_data_hourly, aes(x = hours, y = `Net Income` ), 
+                    size = 1, col = "black") +
+          geom_line(data = incomes_data_hourly, aes(x = hours, y = `work_income`/1000 ), 
+                    size = 1, col = "blue",linetype="dashed") +
+          labs_e61(title = text_string,
+                   x = "Hours worked",
+                   y = "$ (000's)") + add_baseline()  + scale_fill_e61() +
+          scale_x_continuous(expand = c(0, Inf)) + # Remove default expansion for x-axis
+          scale_y_continuous(expand = c(0, 0), limits =c(min_amount, max_net_income)) +
+          plab(label=c("Net Income","Wage earnings"),x=c(5,5),y=c(max(incomes_data_hourly$`Net Income`)*1.1,max(incomes_data_hourly$`Net Income`)*1.15),colour=c("black","blue"))
+        
+        # Placeholder for the tax change part - to test the UI works
+        output$plot_tax <- renderPlotly({
+          if (input$toggle_plot == TRUE) {
+            Hours_Schedule2 } else {
+              Simple_Hours_Schedule2}})
+    
+
+  
       
       ######################################################################################
       ### EMTR Chart - hours worked. 
@@ -651,20 +715,12 @@ server <- function(input, output, session) {
         if (input$toggle_plot == TRUE) {
           EMTR_Schedule } else {
             Simple_EMTR_Schedule}})
-
       
-      # output$plot2 <- renderPlotly({
-      #   tryCatch({
-      #     if (input$toggle_plot == TRUE) {
-      #       ggplotly(EMTR_Schedule)
-      #     } else {
-      #       ggplotly(Simple_EMTR_Schedule)
-      #     }
-      #   }, error = function(e) {
-      #     message("Error in plotting: ", e$message)
-      #     NULL  # Return NULL if an error occurs
-      #   })
-      # })
+      output$plot2_tax <- renderPlotly({
+        if (input$toggle_plot == FALSE) {
+          EMTR_Schedule } else {
+            Simple_EMTR_Schedule}})
+
       
       
       #### Ensure that the text is correct to describe the charts. 
@@ -792,6 +848,11 @@ server <- function(input, output, session) {
       
       output$plot <- renderPlotly({
         if (input$toggle_plot == TRUE) {
+          Income_Schedule } else {
+            Simple_Income_Schedule}})
+      
+      output$plot_tax <- renderPlotly({
+        if (input$toggle_plot == FALSE) {
           Income_Schedule } else {
             Simple_Income_Schedule}})
     
@@ -927,6 +988,11 @@ server <- function(input, output, session) {
 
       output$plot2 <- renderPlotly({
         if (input$toggle_plot == TRUE) {
+          EMTR_Schedule } else {
+            Simple_EMTR_Schedule}})
+      
+      output$plot2_tax <- renderPlotly({
+        if (input$toggle_plot == FALSE) {
           EMTR_Schedule } else {
             Simple_EMTR_Schedule}})
       

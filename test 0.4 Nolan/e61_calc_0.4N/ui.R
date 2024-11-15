@@ -108,7 +108,7 @@ fluidPage(
         ),
         ############ TTC Panel, where the user can change our TT system #######
         
-        tabPanel("Tax and Transfer Characteristics",
+        tabPanel("Tax and Transfer Changes",
                  # Box to alter the tax system
                  checkboxInput("edit_tax_brackets", "Edit Tax Brackets"),
                  # If selected, load a box to select the number of tax brackets desired, and 
@@ -153,95 +153,93 @@ fluidPage(
     
     ############### Main Panel ************* Results #########################################
     mainPanel(
-      
-      #### Add a checkbox to toggle between the two plots
-      checkboxInput("toggle_plot", "Switch to Detailed Plot",value=FALSE),
-      
-      ### Load in the two charts as plotly objects. "With Spinner" provides a signal to 
-      ## the user that the charts are loading. 
-      # fluidRow(
-      #   column(width = 6, withSpinner(plotlyOutput("plot", width = "100%", height = "600px"))),
-      #   column(width = 6, withSpinner(plotlyOutput("plot2", width = "100%", height = "600px")))
-      # ), 
-      
-      ## First plot - net and gross incomes
-      
-      withSpinner(plotlyOutput("plot", width = "100%", height = "600px")),
-      
-      ## Text box for first plot
-      
-      tags$div(
-        style = "margin-top: 30px; margin-bottom: 50px;",
-        bsCollapse(
-          bsCollapsePanel(
-            title = "How do I interpret these incomes?",
-            style = "primary",  # Optional styling (e.g., primary, info, warning, etc.)
-            uiOutput("Income_Title_1"),
-            textOutput("Income_interpretation_text_1"),
-            uiOutput("Income_Title_2"),
-            textOutput("Income_interpretation_text_2")
-          )
-        )
-      ),
-          
-      ## Second plot - EMTRs and PTRs
-      
-      withSpinner(plotlyOutput("plot2", width = "100%", height = "600px")),
-      
-      ### Text box for second plot
-      
-      #### Load in text for interpretation, which is created in the server. 
-      tags$div(
-        style = "margin-top: 30px; margin-bottom: 50px;",
-        bsCollapse(
-          bsCollapsePanel(
-            title = "What are these tax and income concepts?",
-            style = "primary",
-  
-            br(),  # Adds a single line break
-            tags$div(style = "margin-top: 5px;"),  # Adds top margin 
-            
-            # Add each text output with spaces in between
-            textOutput("debug_text"),
-            br(),  
-            uiOutput("Title_1"),
-            textOutput("interpretation_text"),
-            br(),  
-            uiOutput("Title_2"),
-            textOutput("interpretation_text_2"),
-            br(),  
-            uiOutput("Title_3"),
-            textOutput("interpretation_text_3"),
-            br(),  
-            uiOutput("Title_4"),
-            textOutput("interpretation_text_4"),
-            br()  
-          )
-        )
+      # Create a matching tabsetPanel that will be controlled by the sidebar
+      tabsetPanel(
+        id = "main_tabs",
+        type = "hidden",  # Hide the tab navigation since we're controlling it from sidebar
+        
+        # First tab content (Person Characteristics)
+        tabPanel("Person Characteristics",
+                 checkboxInput("toggle_plot", "Switch to Detailed Plot", value = FALSE),
+                 
+                 withSpinner(plotlyOutput("plot", width = "100%", height = "600px")),
+                 
+                 tags$div(
+                   style = "margin-top: 30px; margin-bottom: 50px;",
+                   bsCollapse(
+                     bsCollapsePanel(
+                       title = "How do I interpret these incomes?",
+                       style = "primary",
+                       uiOutput("Income_Title_1"),
+                       textOutput("Income_interpretation_text_1"),
+                       uiOutput("Income_Title_2"),
+                       textOutput("Income_interpretation_text_2")
+                     )
+                   )
+                 ),
+                 
+                 withSpinner(plotlyOutput("plot2", width = "100%", height = "600px")),
+                 
+                 tags$div(
+                   style = "margin-top: 30px; margin-bottom: 50px;",
+                   bsCollapse(
+                     bsCollapsePanel(
+                       title = "What are these tax and income concepts?",
+                       style = "primary",
+                       br(),
+                       tags$div(style = "margin-top: 5px;"),
+                       textOutput("debug_text"),
+                       br(),
+                       uiOutput("Title_1"),
+                       textOutput("interpretation_text"),
+                       br(),
+                       uiOutput("Title_2"),
+                       textOutput("interpretation_text_2"),
+                       br(),
+                       uiOutput("Title_3"),
+                       textOutput("interpretation_text_3"),
+                       br(),
+                       uiOutput("Title_4"),
+                       textOutput("interpretation_text_4"),
+                       br()
+                     )
+                   )
+                 )
         ),
-      
-      tags$div(
-        style = "margin-top: 30px; margin-bottom: 50px;",
-        bsCollapse(
-          bsCollapsePanel(
-            title = "What Assumptions have you made",
-            style = "primary",
-            # Add text output for the initial text
-            textOutput("Ass_interpretation_text_1"),
-            # Add bullet point output for the list
-            uiOutput("Ass_interpretation_text_2")
-          )
+        
+        # Second tab content (Tax and Transfer Characteristics)
+        tabPanel("Tax and Transfer Changes",
+                 tags$div(
+                   style = "margin-top: 30px; margin-bottom: 50px;",
+                   bsCollapse(
+                     bsCollapsePanel(
+                       title = "What is this?",
+                       style = "primary",
+                       textOutput("Intro_tax_text_1")
+                     )
+                   )
+                 ),
+                 
+                 withSpinner(plotlyOutput("plot_tax", width = "100%", height = "600px")),
+                 withSpinner(plotlyOutput("plot", width = "100%", height = "600px")),
+                 #withSpinner(plotlyOutput("plot2_tax", width = "100%", height = "600px")),
+                 
+                 tags$div(
+                   style = "margin-top: 30px; margin-bottom: 50px;",
+                   bsCollapse(
+                     bsCollapsePanel(
+                       title = "What Assumptions have you made",
+                       style = "primary",
+                       textOutput("Ass_interpretation_text_1"),
+                       uiOutput("Ass_interpretation_text_2")
+                     )
+                   )
+                 )
         )
-      ),
-      
-      ### Accreditation, with the current date. 
-      div(style = "margin-top: 20px;",  # Adds some margin at the top
-          p("By Matthew Maltman and Matt Nolan, last updated ", Sys.Date(),
-            ". Currently using Q3 2024 Policy Parameters")# Add a text output for debugging
       )
     )
   ),
-  
+    
   ################################
   # Below code enforces the maximum and minimums for all the boxes, preventing the user from
   ### being able to put in unreasonable values . 
